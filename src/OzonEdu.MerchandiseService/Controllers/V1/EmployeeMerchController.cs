@@ -38,9 +38,9 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                         Item = new EmployeeMerchItem
                         {
                             Name = item.Item.Name,
-                            SkuId = item.Item.SkuId,
+                            SkuId = item.Item.SkuId
                         },
-                        Date = item.Date,
+                        Date = item.Date
                     })
             };
 
@@ -63,7 +63,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                 Items = items.Select(item => new EmployeeMerchItem
                 {
                     Name = item.Name,
-                    SkuId = item.SkuId,
+                    SkuId = item.SkuId
                 })
             };
 
