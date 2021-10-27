@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService
 {
@@ -13,6 +14,8 @@ namespace OzonEdu.MerchandiseService
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+            services.AddSingleton<IMerchandiseService, Services.MerchandiseService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -24,15 +27,9 @@ namespace OzonEdu.MerchandiseService
             }
 
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
-                async Task ProcessRequest(HttpContext context)
-                {
-                    await context.Response.WriteAsync("Hello World! I am the \"Merchandise service\"");
-                }
-
-                endpoints.MapGet("/", ProcessRequest);
+                endpoints.MapControllers();
             });
         }
     }

@@ -21,6 +21,8 @@ ProjectSection(SolutionItems) = preProject
 	docker-compose.yml = docker-compose.yml
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.HttpModels", "src\OzonEdu.MerchandiseService.HttpModels\OzonEdu.MerchandiseService.HttpModels.csproj", "{21808060-E9BA-482F-B765-BBD7466F922B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,11 +30,16 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EAB68E78-CBBB-4736-A400-1A10954C370A} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
+		{21808060-E9BA-482F-B765-BBD7466F922B} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EAB68E78-CBBB-4736-A400-1A10954C370A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EAB68E78-CBBB-4736-A400-1A10954C370A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAB68E78-CBBB-4736-A400-1A10954C370A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAB68E78-CBBB-4736-A400-1A10954C370A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21808060-E9BA-482F-B765-BBD7466F922B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21808060-E9BA-482F-B765-BBD7466F922B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21808060-E9BA-482F-B765-BBD7466F922B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21808060-E9BA-482F-B765-BBD7466F922B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
