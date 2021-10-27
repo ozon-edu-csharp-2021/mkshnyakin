@@ -10,7 +10,7 @@ namespace OzonEdu.MerchandiseService.Services
 {
     public class MerchandiseService : IMerchandiseService
     {
-        private static readonly Dictionary<MerchType, IEnumerable<MerchItem>> MerchPackStub =
+        private static readonly Dictionary<MerchType, IEnumerable<MerchItem>> MerchPackStubs =
             new()
             {
                 [MerchType.WelcomePack] = new MerchItem[]
@@ -51,15 +51,15 @@ namespace OzonEdu.MerchandiseService.Services
                 }
             };
 
-        private static readonly Dictionary<int, IEnumerable<MerchHistoryItem>> HistoryStub =
+        private static readonly Dictionary<int, IEnumerable<MerchHistoryItem>> HistoryStubs =
             new()
             {
-                [1] = MerchPackStub[MerchType.WelcomePack].Select(x => new MerchHistoryItem
+                [1] = MerchPackStubs[MerchType.WelcomePack].Select(x => new MerchHistoryItem
                 {
                     Item = x,
                     Date = DateTime.Today
                 }),
-                [2] = MerchPackStub[MerchType.ProbationPeriodEndingPack].Select(x => new MerchHistoryItem
+                [2] = MerchPackStubs[MerchType.ProbationPeriodEndingPack].Select(x => new MerchHistoryItem
                 {
                     Item = x,
                     Date = DateTime.Today
@@ -68,21 +68,21 @@ namespace OzonEdu.MerchandiseService.Services
 
         public Task<IEnumerable<MerchHistoryItem>> GetHistoryForEmployee(int employeeId, CancellationToken token)
         {
-            HistoryStub.TryGetValue(employeeId, out var history);
+            HistoryStubs.TryGetValue(employeeId, out var history);
             return Task.FromResult(history);
         }
 
         public Task<IEnumerable<MerchItem>> RequestMerchForEmployee(int employeeId, CancellationToken token)
         {
-            var items = MerchPackStub[MerchType.WelcomePack];
-            var historyItems = MerchPackStub[MerchType.WelcomePack]
+            var items = MerchPackStubs[MerchType.WelcomePack];
+            var historyItems = MerchPackStubs[MerchType.WelcomePack]
                 .Select(x => new MerchHistoryItem
                 {
                     Item = x,
-                    Date = DateTime.Today
+                    Date = DateTime.Now
                 });
 
-            var result = HistoryStub.TryAdd(employeeId, historyItems)
+            var result = HistoryStubs.TryAdd(employeeId, historyItems)
                 ? items
                 : null;
             
