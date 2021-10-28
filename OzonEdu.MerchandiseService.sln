@@ -6,6 +6,7 @@ ProjectSection(SolutionItems) = preProject
 	.gitignore = .gitignore
 	Dockerfile = Dockerfile
 	.editorconfig = .editorconfig
+	.dockerignore = .dockerignore
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34C94014-E3FD-40EC-B6C0-8CCC003109FA}"
