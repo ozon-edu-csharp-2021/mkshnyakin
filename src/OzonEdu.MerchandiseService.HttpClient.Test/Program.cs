@@ -10,12 +10,12 @@ namespace OzonEdu.MerchandiseService.HttpClient.Test
     {
         private static async Task Main(string[] args)
         {
+            using var cts = new CancellationTokenSource();
             var http = new System.Net.Http.HttpClient
             {
                 BaseAddress = new Uri("http://localhost:5000/")
             };
             var merchHttpClient = new MerchandiseServiceHttpClient(http);
-            var cts = new CancellationTokenSource();
 
             {
                 var response = await merchHttpClient.V1RequestMerchForEmployee(5, cts.Token);

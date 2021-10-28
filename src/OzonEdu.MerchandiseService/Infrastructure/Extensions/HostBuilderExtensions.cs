@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OzonEdu.MerchandiseService.Infrastructure.Filters;
+using OzonEdu.MerchandiseService.Infrastructure.Interceptors;
 using OzonEdu.MerchandiseService.Infrastructure.StartupFilters;
 using OzonEdu.MerchandiseService.Infrastructure.Swagger;
 
@@ -20,6 +21,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
 
                 services.AddSingleton<IStartupFilter, SwaggerStartupFilter>();
                 services.AddSwaggerGen(SwaggerOptions.Setup);
+                
+                services.AddGrpc(options => options.Interceptors.Add<LoggingInterceptor>());
             });
             return builder;
         }

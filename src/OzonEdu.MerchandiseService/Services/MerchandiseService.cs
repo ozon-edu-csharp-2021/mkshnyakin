@@ -57,12 +57,12 @@ namespace OzonEdu.MerchandiseService.Services
                 [1] = MerchPackStubs[MerchType.WelcomePack].Select(x => new MerchHistoryItem
                 {
                     Item = x,
-                    Date = DateTime.Today
+                    Date = DateTime.Now - TimeSpan.FromDays(1)
                 }),
                 [2] = MerchPackStubs[MerchType.ProbationPeriodEndingPack].Select(x => new MerchHistoryItem
                 {
                     Item = x,
-                    Date = DateTime.Today
+                    Date = DateTime.Now - TimeSpan.FromDays(30)
                 })
             };
 

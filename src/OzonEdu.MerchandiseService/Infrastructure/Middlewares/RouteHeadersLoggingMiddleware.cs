@@ -10,6 +10,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Middlewares
 {
     public class RouteHeadersLoggingMiddleware
     {
+        private const string GrpcContentType = "application/grpc";
         private readonly ILogger<RouteHeadersLoggingMiddleware> _logger;
         private readonly RequestDelegate _next;
 
@@ -27,6 +28,14 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var contentType = context.Request.ContentType;
+            if (!string.IsNullOrEmpty(contentType) && contentType.Contains(GrpcContentType))
+            {
+                // Ignore gRPC request
+                await _next(context);
+                return;
+            }
+
             var path = context.Request.Path.HasValue
                 ? context.Request.Path.Value
                 : string.Empty;
