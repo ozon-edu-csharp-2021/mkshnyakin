@@ -13,7 +13,7 @@ namespace OzonEdu.MerchandiseService.GrpcClient
         static async Task Main(string[] args)
         {
             using var cts = new CancellationTokenSource();
-            using var channel = GrpcChannel.ForAddress("https://localhost:5001");
+            using var channel = GrpcChannel.ForAddress("http://localhost:5001");
             var client = new MerchandiseServiceGrpc.MerchandiseServiceGrpcClient(channel);
 
             try

@@ -3,7 +3,8 @@ services:
   merchandise-service:
     build: .
     ports:
-      - "8080:80"
+      - "5000:5000"
+      - "5001:5001"
 
   supply-service:
     image: ghcr.io/ozon-edu-csharp-2021/supply-service:main
