@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OzonEdu.MerchandiseService.HttpModels;
 using OzonEdu.MerchandiseService.Services;
@@ -19,7 +20,15 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             _merchandiseService = merchandiseMerchandiseService;
         }
 
+        /// <summary>
+        /// Запрос ранее выданного мерча сотруднику
+        /// </summary>
+        /// <param name="employeeId">Идентификатор сотрудника</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(typeof(EmployeeMerchGetResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<EmployeeMerchGetResponse>> GetHistoryForEmployee(
             int employeeId,
             CancellationToken token)
@@ -33,21 +42,29 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             var response = new EmployeeMerchGetResponse
             {
                 Items = items
-                    .Select(item => new EmployeeMerchGetResponseItem
+                    .Select(x => new EmployeeMerchGetResponseItem
                     {
                         Item = new EmployeeMerchItem
                         {
-                            Name = item.Item.Name,
-                            SkuId = item.Item.SkuId
+                            Name = x.Item.Name,
+                            SkuId = x.Item.SkuId
                         },
-                        Date = item.Date
+                        Date = x.Date
                     })
             };
 
             return Ok(response);
         }
 
+        /// <summary>
+        /// Запрос на выдачу мерча для сотрудника
+        /// </summary>
+        /// <param name="employeeId">Идентификатор сотрудника</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
             int employeeId,
             CancellationToken token)
@@ -60,10 +77,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
 
             var response = new EmployeeMerchPostResponse
             {
-                Items = items.Select(item => new EmployeeMerchItem
+                Items = items.Select(x => new EmployeeMerchItem
                 {
-                    Name = item.Name,
-                    SkuId = item.SkuId
+                    Name = x.Name,
+                    SkuId = x.SkuId
                 })
             };
 

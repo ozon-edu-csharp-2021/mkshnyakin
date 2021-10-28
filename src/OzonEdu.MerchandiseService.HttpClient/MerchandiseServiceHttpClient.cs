@@ -2,20 +2,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 using OzonEdu.MerchandiseService.HttpModels;
-using OzonEduHttpClient = System.Net.Http.HttpClient;
+using SystemHttpClient = System.Net.Http.HttpClient;
 
 namespace OzonEdu.MerchandiseService.HttpClient
 {
     public class MerchandiseServiceHttpClient : IMerchandiseServiceHttpClient
     {
-        private readonly OzonEduHttpClient _httpClient;
+        private readonly SystemHttpClient _httpClient;
 
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public MerchandiseServiceHttpClient(OzonEduHttpClient httpClient)
+        public MerchandiseServiceHttpClient(SystemHttpClient httpClient)
         {
             _httpClient = httpClient;
         }
