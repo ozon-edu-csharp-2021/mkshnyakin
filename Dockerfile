@@ -1,4 +1,8 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build1
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build0
+WORKDIR /source/OzonEdu.MerchandiseService.Infrastructure
+COPY src/OzonEdu.MerchandiseService.Infrastructure/. .
+
+FROM build0 AS build1
 WORKDIR /source/OzonEdu.MerchandiseService.HttpModels
 COPY src/OzonEdu.MerchandiseService.HttpModels/. .
 

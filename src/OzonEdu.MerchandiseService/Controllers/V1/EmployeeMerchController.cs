@@ -30,36 +30,49 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [HttpGet]
         [ProducesResponseType(typeof(EmployeeMerchGetResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<EmployeeMerchGetResponse>> GetHistoryForEmployee(
             int employeeId,
             CancellationToken token)
         {
-            var items = await _merchForEmployeesService.GetHistoryForEmployee(employeeId, token);
-            if (items is null)
+            try
             {
-                var notFoundResponse = new RestErrorResponse
+                var items = await _merchForEmployeesService.GetHistoryForEmployee(employeeId, token);
+                if (items is null)
                 {
-                    Status = StatusCodes.Status404NotFound,
-                    Message = $"Merch history not found for employee {employeeId}"
-                };
-                return NotFound(notFoundResponse);
-            }
-
-            var response = new EmployeeMerchGetResponse
-            {
-                Items = items
-                    .Select(x => new EmployeeMerchGetResponseItem
+                    var notFoundResponse = new RestErrorResponse
                     {
-                        Item = new EmployeeMerchItem
-                        {
-                            Name = x.Item.Name,
-                            SkuId = x.Item.SkuId
-                        },
-                        Date = x.Date
-                    })
-            };
+                        Status = StatusCodes.Status404NotFound,
+                        Message = $"Merch history not found for employee {employeeId}"
+                    };
+                    return NotFound(notFoundResponse);
+                }
 
-            return Ok(response);
+                var response = new EmployeeMerchGetResponse
+                {
+                    Items = items
+                        .Select(x => new EmployeeMerchGetResponseItem
+                        {
+                            Item = new EmployeeMerchItem
+                            {
+                                Name = x.Item.Name,
+                                SkuId = x.Item.SkuId
+                            },
+                            Date = x.Date
+                        })
+                };
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                var errorResponse = new RestErrorResponse
+                {
+                    Status = StatusCodes.Status502BadGateway,
+                    Message = e.Message
+                };
+                return StatusCode(StatusCodes.Status502BadGateway, errorResponse);
+            }
         }
 
         /// <summary>
@@ -71,32 +84,45 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [HttpPost]
         [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
             int employeeId,
             CancellationToken token)
         {
-            var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
-            if (items is null)
+            try
             {
-                var conflictResponse = new RestErrorResponse
+                var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
+                if (items is null)
                 {
-                    Status = StatusCodes.Status409Conflict,
-                    Message = $"Merch already given for employee {employeeId}"
+                    var conflictResponse = new RestErrorResponse
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Message = $"Merch already given for employee {employeeId}"
+                    };
+                    return Conflict(conflictResponse);
+                }
+
+                var response = new EmployeeMerchPostResponse
+                {
+                    Items = items.Select(x => new EmployeeMerchItem
+                    {
+                        Name = x.Name,
+                        SkuId = x.SkuId
+                    })
                 };
-                return Conflict(conflictResponse);
+
+                var uri = Url.Action(nameof(GetHistoryForEmployee), new {employeeId});
+                return Created(uri, response);
             }
-
-            var response = new EmployeeMerchPostResponse
+            catch (Exception e)
             {
-                Items = items.Select(x => new EmployeeMerchItem
+                var errorResponse = new RestErrorResponse
                 {
-                    Name = x.Name,
-                    SkuId = x.SkuId
-                })
-            };
-
-            var uri = Url.Action(nameof(GetHistoryForEmployee), new {employeeId});
-            return Created(uri, response);
+                    Status = StatusCodes.Status502BadGateway,
+                    Message = e.Message
+                };
+                return StatusCode(StatusCodes.Status502BadGateway, errorResponse);
+            }
         }
     }
 }
