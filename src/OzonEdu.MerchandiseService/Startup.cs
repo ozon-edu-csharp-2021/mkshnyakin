@@ -10,7 +10,7 @@ namespace OzonEdu.MerchandiseService
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IMerchandiseService, Services.MerchandiseService>();
+            services.AddSingleton<IMerchForEmployeesService, Services.MerchForEmployeesService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

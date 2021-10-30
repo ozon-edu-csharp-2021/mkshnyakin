@@ -10,7 +10,7 @@ using OzonEdu.MerchandiseService.Models;
 
 namespace OzonEdu.MerchandiseService.Services
 {
-    public class MerchandiseService : IMerchandiseService
+    public class MerchForEmployeesService : IMerchForEmployeesService
     {
         private static readonly ImmutableDictionary<MerchType, ImmutableArray<MerchItem>> MerchPackStubs =
             new Dictionary<MerchType, ImmutableArray<MerchItem>>

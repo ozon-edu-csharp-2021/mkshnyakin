@@ -14,11 +14,11 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     [Produces("application/json")]
     public class EmployeeMerchController : ControllerBase
     {
-        private readonly IMerchandiseService _merchandiseService;
+        private readonly IMerchForEmployeesService _merchForEmployeesService;
 
-        public EmployeeMerchController(IMerchandiseService merchandiseMerchandiseService)
+        public EmployeeMerchController(IMerchForEmployeesService merchForEmployeesMerchForEmployeesService)
         {
-            _merchandiseService = merchandiseMerchandiseService;
+            _merchForEmployeesService = merchForEmployeesMerchForEmployeesService;
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             int employeeId,
             CancellationToken token)
         {
-            var items = await _merchandiseService.GetHistoryForEmployee(employeeId, token);
+            var items = await _merchForEmployeesService.GetHistoryForEmployee(employeeId, token);
             if (items is null)
             {
                 var notFoundResponse = new RestErrorResponse
@@ -75,7 +75,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             int employeeId,
             CancellationToken token)
         {
-            var items = await _merchandiseService.RequestMerchForEmployee(employeeId, token);
+            var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
             if (items is null)
             {
                 var conflictResponse = new RestErrorResponse

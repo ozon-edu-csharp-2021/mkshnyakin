@@ -12,11 +12,11 @@ namespace OzonEdu.MerchandiseService.GrpcServices
 {
     public class MerchandiseServiceGrpcService : MerchandiseServiceGrpc.MerchandiseServiceGrpcBase
     {
-        private readonly IMerchandiseService _merchandiseService;
+        private readonly IMerchForEmployeesService _merchForEmployeesService;
 
-        public MerchandiseServiceGrpcService(IMerchandiseService merchandiseService)
+        public MerchandiseServiceGrpcService(IMerchForEmployeesService merchForEmployeesService)
         {
-            _merchandiseService = merchandiseService;
+            _merchForEmployeesService = merchForEmployeesService;
         }
 
         public override async Task<GetHistoryForEmployeeResponse> GetHistoryForEmployee(
@@ -26,7 +26,7 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             IEnumerable<MerchHistoryItem> history = null;
             try
             {
-                history = await _merchandiseService.GetHistoryForEmployee(
+                history = await _merchForEmployeesService.GetHistoryForEmployee(
                     request.EmployeeId,
                     context.CancellationToken);
             }
@@ -58,7 +58,7 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             IEnumerable<MerchItem> items = null;
             try
             {
-                items = await _merchandiseService.RequestMerchForEmployee(employeeId, context.CancellationToken);
+                items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, context.CancellationToken);
             }
             catch (Exception e)
             {
