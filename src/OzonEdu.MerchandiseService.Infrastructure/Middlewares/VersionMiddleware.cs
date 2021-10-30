@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using static OzonEdu.MerchandiseService.Infrastructure.Helpers.AssemblyHelper;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Middlewares
 {
@@ -19,9 +19,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Middlewares
 
         public VersionMiddleware(RequestDelegate next)
         {
-            var assembly = Assembly.GetExecutingAssembly().GetName();
-            var name = assembly.Name ?? "ServiceName";
-            var version = assembly.Version?.ToString() ?? "0.0.0.0";
+            var (name, version) = GetEntryAssemblyInfo();
             var model = new Model
             {
                 Version = version,

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using static OzonEdu.MerchandiseService.Infrastructure.Helpers.AssemblyHelper;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Swagger
 {
@@ -11,9 +11,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Swagger
     {
         public static void Setup(SwaggerGenOptions options)
         {
-            var assembly = Assembly.GetExecutingAssembly().GetName();
-            var name = assembly.Name ?? "ServiceName";
-            var version = assembly.Version?.ToString() ?? "0.0.0.0";
+            var (name, version) = GetEntryAssemblyInfo();
             options.SwaggerDoc("v1", new OpenApiInfo {Title = name, Version = version});
             options.CustomSchemaIds(x => x.FullName);
 

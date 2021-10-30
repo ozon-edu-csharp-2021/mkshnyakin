@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,48 +12,49 @@ namespace OzonEdu.MerchandiseService.Services
 {
     public class MerchandiseService : IMerchandiseService
     {
-        private static readonly Dictionary<MerchType, MerchItem[]> MerchPackStubs =
-            new()
-            {
-                [MerchType.WelcomePack] = new MerchItem[]
+        private static readonly ImmutableDictionary<MerchType, ImmutableArray<MerchItem>> MerchPackStubs =
+            new Dictionary<MerchType, ImmutableArray<MerchItem>>
                 {
-                    new()
+                    [MerchType.WelcomePack] = ImmutableArray.Create(new MerchItem[]
                     {
-                        Name = "Рюкзак",
-                        SkuId = 1
-                    },
-                    new()
+                        new()
+                        {
+                            Name = "Рюкзак",
+                            SkuId = 1
+                        },
+                        new()
+                        {
+                            Name = "Кепка",
+                            SkuId = 2
+                        },
+                        new()
+                        {
+                            Name = "Футболка",
+                            SkuId = 3
+                        }
+                    }),
+                    [MerchType.ProbationPeriodEndingPack] = ImmutableArray.Create(new MerchItem[]
                     {
-                        Name = "Кепка",
-                        SkuId = 2
-                    },
-                    new()
-                    {
-                        Name = "Футболка",
-                        SkuId = 3
-                    }
-                },
-                [MerchType.ProbationPeriodEndingPack] = new MerchItem[]
-                {
-                    new()
-                    {
-                        Name = "Ручка",
-                        SkuId = 4
-                    },
-                    new()
-                    {
-                        Name = "Кружка",
-                        SkuId = 5
-                    },
-                    new()
-                    {
-                        Name = "Флешка",
-                        SkuId = 6
-                    }
+                        new()
+                        {
+                            Name = "Ручка",
+                            SkuId = 4
+                        },
+                        new()
+                        {
+                            Name = "Кружка",
+                            SkuId = 5
+                        },
+                        new()
+                        {
+                            Name = "Флешка",
+                            SkuId = 6
+                        }
+                    })
                 }
-            };
+                .ToImmutableDictionary();
 
-        private static readonly Dictionary<int, IEnumerable<MerchHistoryItem>> HistoryStubs =
+        private static readonly ConcurrentDictionary<int, IEnumerable<MerchHistoryItem>> HistoryStubs =
             new()
             {
                 [1] = MerchPackStubs[MerchType.WelcomePack].Select(x => new MerchHistoryItem

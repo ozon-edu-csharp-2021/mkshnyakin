@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
@@ -22,8 +23,17 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             EmployeeMerchRequest request,
             ServerCallContext context)
         {
-            var history =
-                await _merchandiseService.GetHistoryForEmployee(request.EmployeeId, context.CancellationToken);
+            IEnumerable<MerchHistoryItem> history = null;
+            try
+            {
+                history = await _merchandiseService.GetHistoryForEmployee(
+                    request.EmployeeId,
+                    context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw CreateInternalRpcException(e);
+            }
 
             var items = history ?? Enumerable.Empty<MerchHistoryItem>();
             var convertedItems = items.Select(x => new EmployeeMerchGetResponseItem
@@ -45,12 +55,24 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             ServerCallContext context)
         {
             var employeeId = request.EmployeeId;
-            var items = await _merchandiseService.RequestMerchForEmployee(employeeId, context.CancellationToken);
+            IEnumerable<MerchItem> items = null;
+            try
+            {
+                items = await _merchandiseService.RequestMerchForEmployee(employeeId, context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw CreateInternalRpcException(e);
+            }
+
             if (items is null)
             {
-                throw new RpcException(
-                    new Status(StatusCode.AlreadyExists, "Merch already given"),
-                    new Metadata {new("employeeId", employeeId.ToString())});
+                var status = new Status(StatusCode.AlreadyExists, "Merch already given"); 
+                var metadata = new Metadata
+                {
+                    {"employeeId", employeeId.ToString()},
+                };
+                throw new RpcException(status, metadata);
             }
 
             var response = new RequestMerchForEmployeeResponse
@@ -66,6 +88,18 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             };
 
             return response;
+        }
+
+        private static RpcException CreateInternalRpcException(Exception e)
+        {
+            var status = new Status(StatusCode.Internal, e.Message);
+            var metadata = new Metadata
+            {
+                {"ExceptionType", e.GetType().FullName},
+                //{"StackTrace", e.StackTrace}, // BUG: Если раскомментировать, то будет StatusCode.Unknown с пустыми Trailers
+            };
+            var rpcException = new RpcException(status, metadata);
+            return rpcException;
         }
     }
 }

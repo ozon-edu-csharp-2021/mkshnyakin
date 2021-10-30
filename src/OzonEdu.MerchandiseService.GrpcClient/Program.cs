@@ -37,13 +37,17 @@ namespace OzonEdu.MerchandiseService.GrpcClient
             try
             {
                 var response = await client.RequestMerchForEmployeeAsync(
-                    new EmployeeMerchRequest {EmployeeId = 5},
+                    new EmployeeMerchRequest {EmployeeId = 1},
                     cancellationToken: cts.Token);
                 var items = response?.Items ?? Enumerable.Empty<EmployeeMerchItem>();
                 foreach (var item in items)
                 {
                     Console.WriteLine($"Name: {item.Name}. Sku: {item.SkuId}.");
                 }
+            }
+            catch (RpcException e) when (e.StatusCode == StatusCode.AlreadyExists)
+            {
+                Console.WriteLine(e.Status);
             }
             catch (RpcException e)
             {

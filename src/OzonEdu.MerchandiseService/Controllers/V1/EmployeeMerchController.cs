@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(EmployeeMerchGetResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<EmployeeMerchGetResponse>> GetHistoryForEmployee(
             int employeeId,
             CancellationToken token)
@@ -36,7 +37,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             var items = await _merchandiseService.GetHistoryForEmployee(employeeId, token);
             if (items is null)
             {
-                return NotFound();
+                var notFoundResponse = new RestErrorResponse
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Message = $"Merch history not found for employee {employeeId}"
+                };
+                return NotFound(notFoundResponse);
             }
 
             var response = new EmployeeMerchGetResponse
@@ -63,8 +69,8 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
             int employeeId,
             CancellationToken token)
@@ -72,7 +78,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             var items = await _merchandiseService.RequestMerchForEmployee(employeeId, token);
             if (items is null)
             {
-                return Conflict();
+                var conflictResponse = new RestErrorResponse
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Message = $"Merch already given for employee {employeeId}"
+                };
+                return Conflict(conflictResponse);
             }
 
             var response = new EmployeeMerchPostResponse
@@ -84,7 +95,8 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                 })
             };
 
-            return Ok(response);
+            var uri = Url.Action(nameof(GetHistoryForEmployee), new {employeeId});
+            return Created(uri, response);
         }
     }
 }
