@@ -28,8 +28,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.Grpc", "src\OzonEdu.MerchandiseService.Grpc\OzonEdu.MerchandiseService.Grpc.csproj", "{E4D72B9A-BB5E-4494-8841-B0493FB1A313}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.GrpcClient", "src\OzonEdu.MerchandiseService.GrpcClient\OzonEdu.MerchandiseService.GrpcClient.csproj", "{D9E37A74-77AB-433B-A2C8-DB2A23B29742}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.Infrastructure", "src\OzonEdu.MerchandiseService.Infrastructure\OzonEdu.MerchandiseService.Infrastructure.csproj", "{43D1F1E8-7D07-4196-8C7E-B6CA0E1864B3}"
 EndProject
 Global
@@ -42,7 +40,6 @@ Global
 		{21808060-E9BA-482F-B765-BBD7466F922B} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 		{940C4463-A593-4176-88D3-08E4F51AEB8D} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 		{E4D72B9A-BB5E-4494-8841-B0493FB1A313} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
-		{D9E37A74-77AB-433B-A2C8-DB2A23B29742} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 		{43D1F1E8-7D07-4196-8C7E-B6CA0E1864B3} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -62,10 +59,6 @@ Global
 		{E4D72B9A-BB5E-4494-8841-B0493FB1A313}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4D72B9A-BB5E-4494-8841-B0493FB1A313}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4D72B9A-BB5E-4494-8841-B0493FB1A313}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9E37A74-77AB-433B-A2C8-DB2A23B29742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9E37A74-77AB-433B-A2C8-DB2A23B29742}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9E37A74-77AB-433B-A2C8-DB2A23B29742}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9E37A74-77AB-433B-A2C8-DB2A23B29742}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43D1F1E8-7D07-4196-8C7E-B6CA0E1864B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{43D1F1E8-7D07-4196-8C7E-B6CA0E1864B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43D1F1E8-7D07-4196-8C7E-B6CA0E1864B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
