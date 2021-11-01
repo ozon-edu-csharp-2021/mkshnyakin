@@ -1,17 +1,27 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /source
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build0
+WORKDIR /source/OzonEdu.MerchandiseService.Infrastructure
+COPY src/OzonEdu.MerchandiseService.Infrastructure/. .
 
-COPY src/OzonEdu.MerchandiseService/*.csproj .
-RUN dotnet restore
+FROM build0 AS build1
+WORKDIR /source/OzonEdu.MerchandiseService.HttpModels
+COPY src/OzonEdu.MerchandiseService.HttpModels/. .
 
+FROM build1 AS build2
+WORKDIR /source/OzonEdu.MerchandiseService.Grpc
+COPY src/OzonEdu.MerchandiseService.Grpc/. .
+
+FROM build2 AS build3
+WORKDIR /source/OzonEdu.MerchandiseService
 COPY src/OzonEdu.MerchandiseService/. .
-RUN dotnet publish -c Release -o /app --no-restore
+
+FROM build3 AS publish
+RUN dotnet publish -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
-EXPOSE 80
-EXPOSE 443
+EXPOSE 5000
+EXPOSE 5001
 ENTRYPOINT ["dotnet", "OzonEdu.MerchandiseService.dll"]
 
 FROM runtime AS final
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=publish /app .
