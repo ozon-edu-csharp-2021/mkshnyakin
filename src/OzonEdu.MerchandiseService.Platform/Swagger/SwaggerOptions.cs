@@ -3,9 +3,9 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using static OzonEdu.MerchandiseService.Infrastructure.Helpers.AssemblyHelper;
+using static OzonEdu.MerchandiseService.Platform.Helpers.AssemblyHelper;
 
-namespace OzonEdu.MerchandiseService.Infrastructure.Swagger
+namespace OzonEdu.MerchandiseService.Platform.Swagger
 {
     public class SwaggerOptions
     {

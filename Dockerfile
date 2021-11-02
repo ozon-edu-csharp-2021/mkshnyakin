@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build0
-WORKDIR /source/OzonEdu.MerchandiseService.Infrastructure
-COPY src/OzonEdu.MerchandiseService.Infrastructure/. .
+WORKDIR /source/OzonEdu.MerchandiseService.Platform
+COPY src/OzonEdu.MerchandiseService.Platform/. .
 
 FROM build0 AS build1
 WORKDIR /source/OzonEdu.MerchandiseService.HttpModels
@@ -11,10 +11,18 @@ WORKDIR /source/OzonEdu.MerchandiseService.Grpc
 COPY src/OzonEdu.MerchandiseService.Grpc/. .
 
 FROM build2 AS build3
+WORKDIR /source/OzonEdu.MerchandiseService.Domain
+COPY src/OzonEdu.MerchandiseService.Domain/. .
+
+FROM build3 AS build4
+WORKDIR /source/OzonEdu.MerchandiseService.Infrastructure
+COPY src/OzonEdu.MerchandiseService.Infrastructure/. .
+
+FROM build4 AS build5
 WORKDIR /source/OzonEdu.MerchandiseService
 COPY src/OzonEdu.MerchandiseService/. .
 
-FROM build3 AS publish
+FROM build5 AS publish
 RUN dotnet publish -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime

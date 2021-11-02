@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using static OzonEdu.MerchandiseService.Infrastructure.Helpers.AssemblyHelper;
+using static OzonEdu.MerchandiseService.Platform.Helpers.AssemblyHelper;
 
-namespace OzonEdu.MerchandiseService.Infrastructure.Middlewares
+namespace OzonEdu.MerchandiseService.Platform.Middlewares
 {
     public class VersionMiddleware
     {

@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OzonEdu.MerchandiseService.Infrastructure.Filters;
-using OzonEdu.MerchandiseService.Infrastructure.Interceptors;
-using OzonEdu.MerchandiseService.Infrastructure.StartupFilters;
-using OzonEdu.MerchandiseService.Infrastructure.Swagger;
+using OzonEdu.MerchandiseService.Platform.Filters;
+using OzonEdu.MerchandiseService.Platform.Interceptors;
+using OzonEdu.MerchandiseService.Platform.StartupFilters;
+using OzonEdu.MerchandiseService.Platform.Swagger;
 
-namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
+namespace OzonEdu.MerchandiseService.Platform.Extensions
 {
     public static class HostBuilderExtensions
     {

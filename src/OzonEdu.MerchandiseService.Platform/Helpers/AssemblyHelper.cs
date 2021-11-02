@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace OzonEdu.MerchandiseService.Infrastructure.Helpers
+namespace OzonEdu.MerchandiseService.Platform.Helpers
 {
     public static class AssemblyHelper
     {
