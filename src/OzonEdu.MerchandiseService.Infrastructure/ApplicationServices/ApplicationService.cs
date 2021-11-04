@@ -1,4 +1,6 @@
-﻿using OzonEdu.MerchandiseService.Infrastructure.Contracts;
+﻿using System.IO.Compression;
+using System.Threading.Tasks;
+using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
@@ -19,8 +21,14 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
         {
             _employeeClient = employeeClient;
             _messageBus = messageBus;
+            Test().GetAwaiter().GetResult();
         }
 
+        private async Task Test()
+        {
+            var person = await _employeeClient.GetByIdAsync(3);
+        }
+/*
         /// <summary>
         /// Создать запрос на выдачу мерча новому сотруднику
         /// </summary>
@@ -57,5 +65,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                 return GiveMerchResult.Fail(e.Message);
             }
         }
+        */
     }
 }

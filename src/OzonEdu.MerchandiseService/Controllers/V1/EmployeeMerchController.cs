@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CSharpCourse.Core.Lib.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -72,20 +73,24 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         /// Запрос на выдачу мерча для сотрудника
         /// </summary>
         /// <param name="employeeId">Идентификатор сотрудника</param>
+        /// <param name="merchType">Тип мерча. Если пустой, то WelcomePack (10)</param>
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost]
+        [Route("{merchType}")]
         [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
             int employeeId,
+            MerchType merchType,
             CancellationToken token)
         {
-            var createMerchRequestCommand = new CreateMerchRequestCommand
+            var createMerchRequestForEmployeeIdCommand = new CreateMerchRequestForEmployeeIdCommand
             {
-                
+                EmployeeId = employeeId,
+                MerchType = merchType
             };
-            var result = await _mediator.Send(createMerchRequestCommand, token);
+            var result = await _mediator.Send(createMerchRequestForEmployeeIdCommand, token);
             
             var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
             if (items is null)

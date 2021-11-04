@@ -3,7 +3,7 @@ using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate
 {
-    public class ItemName : ValueObject
+    public sealed class ItemName : ValueObject
     {
         public ItemName(string value)
         {

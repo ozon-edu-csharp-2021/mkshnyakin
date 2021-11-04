@@ -3,7 +3,7 @@ using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate
 {
-    public class Sku : ValueObject
+    public sealed class Sku : ValueObject
     {
         public Sku(long id)
         {
