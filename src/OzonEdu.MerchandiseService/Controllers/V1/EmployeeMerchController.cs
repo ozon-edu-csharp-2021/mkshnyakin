@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OzonEdu.MerchandiseService.HttpModels;
+using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
@@ -15,10 +17,14 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     public class EmployeeMerchController : ControllerBase
     {
         private readonly IMerchForEmployeesService _merchForEmployeesService;
+        private readonly IMediator _mediator;
 
-        public EmployeeMerchController(IMerchForEmployeesService merchForEmployeesMerchForEmployeesService)
+        public EmployeeMerchController(
+            IMerchForEmployeesService merchForEmployeesMerchForEmployeesService,
+            IMediator mediator)
         {
             _merchForEmployeesService = merchForEmployeesMerchForEmployeesService;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -75,6 +81,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             int employeeId,
             CancellationToken token)
         {
+            var createMerchRequestCommand = new CreateMerchRequestCommand
+            {
+                
+            };
+            var result = await _mediator.Send(createMerchRequestCommand, token);
+            
             var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
             if (items is null)
             {
