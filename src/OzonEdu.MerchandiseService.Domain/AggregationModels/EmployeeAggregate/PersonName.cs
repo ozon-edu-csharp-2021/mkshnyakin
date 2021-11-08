@@ -1,14 +1,11 @@
 using System.Collections.Generic;
+using OzonEdu.MerchandiseService.Domain.Exceptions;
 using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
 {
     public sealed class PersonName : ValueObject
     {
-        public string FirstName { get; private set; }
-        public string MiddleName { get; private set; }
-        public string LastName { get; private set; }
-
         private PersonName(string firstName, string middleName, string lastName)
         {
             FirstName = firstName;
@@ -16,9 +13,16 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
             LastName = lastName;
         }
 
+        public string FirstName { get; }
+        public string MiddleName { get; }
+        public string LastName { get; }
+
         public static PersonName Create(string firstName, string middleName, string lastName)
         {
-            return new PersonName(firstName, middleName, lastName);
+            return IsValid(firstName, middleName, lastName)
+                ? new PersonName(firstName, middleName, lastName)
+                : throw new CorruptedValueObjectException(
+                    $"PersonName is invalid. FirstName: '{firstName}'. MiddleName: '{middleName}'. LastName: '{lastName}'");
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
@@ -26,6 +30,18 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
             yield return FirstName;
             yield return MiddleName;
             yield return LastName;
+        }
+
+        private static bool IsValid(string firstName, string middleName, string lastName)
+        {
+            return middleName is not null
+                   && !string.IsNullOrEmpty(firstName)
+                   && !string.IsNullOrEmpty(lastName);
+        }
+
+        public override string ToString()
+        {
+            return $"{FirstName} {MiddleName} {LastName}";
         }
     }
 }

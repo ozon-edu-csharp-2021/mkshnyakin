@@ -19,6 +19,14 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
 
         public Email Email { get; private set; }
 
-        public void ChangeEmail(string newEmail) => Email = Email.Parse(newEmail);
+        public void ChangeEmail(string newEmail)
+        {
+            Email = Email.Create(newEmail);
+        }
+
+        public override string ToString()
+        {
+            return $"{Id}. {Name}. {Email}";
+        }
     }
 }

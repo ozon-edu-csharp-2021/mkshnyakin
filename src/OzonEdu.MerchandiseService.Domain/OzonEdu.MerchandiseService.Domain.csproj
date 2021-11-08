@@ -5,15 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CSharpCourse.Core.Lib" Version="1.4.0" />
       <PackageReference Include="MediatR" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Contracts" />
-      <Folder Include="DomainServices" />
       <Folder Include="Events" />
-      <Folder Include="Exceptions" />
     </ItemGroup>
 
 </Project>

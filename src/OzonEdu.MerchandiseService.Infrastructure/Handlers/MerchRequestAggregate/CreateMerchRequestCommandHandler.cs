@@ -3,10 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
+using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
+using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate
 {
@@ -14,19 +16,23 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
     {
         private readonly IOzonEduEmployeeServiceClient _employeeClient;
         private readonly IMerchRequestRepository _merchRequestRepository;
+        private readonly IMerchPackItemRepository _merchPackItemRepository;
 
-        public CreateMerchRequestCommandHandler(IMerchRequestRepository merchRequestRepository,
-            IOzonEduEmployeeServiceClient employeeClient)
+        public CreateMerchRequestCommandHandler(
+            IMerchRequestRepository merchRequestRepository,
+            IOzonEduEmployeeServiceClient employeeClient,
+            IMerchPackItemRepository merchPackItemRepository)
         {
             _merchRequestRepository = merchRequestRepository;
             _employeeClient = employeeClient;
+            _merchPackItemRepository = merchPackItemRepository;
         }
 
         public async Task<CreateMerchRequestResponse> Handle(CreateMerchRequestForEmployeeIdCommand requestForEmployeeId,
             CancellationToken cancellationToken)
         {
             var employeeId = requestForEmployeeId.EmployeeId;
-            var employeeViewModel = await _employeeClient.GetByIdAsync(employeeId)
+            var employeeViewModel = await _employeeClient.GetByIdAsync(employeeId, cancellationToken)
                                     ?? throw new EmployeeNotFoundException($"Employee (id:{employeeId}) is not found");
 
             var employee = new Employee(
@@ -35,8 +41,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                     employeeViewModel.FirstName,
                     employeeViewModel.MiddleName,
                     employeeViewModel.LastName),
-                Email.Parse(employeeViewModel.Email)
+                Email.Create(employeeViewModel.Email)
             );
+
+            var merchType = requestForEmployeeId.MerchType.ToRequestMerchType();
+            var merchItems = await _merchPackItemRepository.FindByMerchTypeAsync(merchType, cancellationToken);
 
             /*
             var stockInDb = await _stockItemRepository.FindBySkuAsync(new Sku(request.Sku), cancellationToken);
@@ -82,7 +91,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             CancellationToken cancellationToken)
         {
             var employeeEmail = requestForEmployeeId.EmployeeEmail;
-            var employeeViewModel = await _employeeClient.FindByEmailAsync(employeeEmail.Value)
+            var employeeViewModel = await _employeeClient.FindByEmailAsync(employeeEmail.Value, cancellationToken)
                                     ?? throw new EmployeeNotFoundException(
                                         $"Employee (email:{employeeEmail}) is not found");
 
@@ -94,7 +103,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                     employeeViewModel.FirstName,
                     employeeViewModel.MiddleName,
                     employeeViewModel.LastName),
-                Email.Parse(employeeViewModel.Email)
+                Email.Create(employeeViewModel.Email)
             );
 
             /*

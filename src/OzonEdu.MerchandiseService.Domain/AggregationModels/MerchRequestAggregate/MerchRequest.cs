@@ -4,17 +4,9 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
 {
     public sealed class MerchRequest : Entity
     {
+        public ProcessStatus Status { get; private set; }
+        public CreationMode Mode { get; private set; }
+        public RequestMerchType RequestMerchType { get; private set; }
         
     }
-    
-    public enum MerchandizeRequestStatus
-    {
-        Draft,
-        Created,
-        Assigned,
-        InProgress,
-        Done,
-    }
-    
-    //MerchRequest
 }

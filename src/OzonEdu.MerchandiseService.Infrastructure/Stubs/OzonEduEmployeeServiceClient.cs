@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 
@@ -9,16 +10,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 {
     public class OzonEduEmployeeServiceClient : IOzonEduEmployeeServiceClient
     {
-        public class EmployeeViewModel
-        {
-            public long Id { get; init; }
-            public string FirstName { get; init; }
-            public string LastName { get; init; }
-            public string MiddleName { get; init; }
-            public DateTime BirthDay { get; init; }
-            public DateTime HiringDate { get; init; }
-            public string Email { get; init; }
-        }
+        private static readonly IdentityGenerator IdGen = new();
 
         private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
@@ -26,7 +18,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
         {
             new()
             {
-                Id = 1,
+                Id = IdGen.Get(),
                 FirstName = "Антон",
                 MiddleName = "Фёдорович",
                 LastName = "Глушков",
@@ -36,7 +28,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 2,
+                Id = IdGen.Get(),
                 FirstName = "Даниил",
                 MiddleName = "Иванович",
                 LastName = "Гуляев",
@@ -46,7 +38,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 3,
+                Id = IdGen.Get(),
                 FirstName = "Максим",
                 MiddleName = "Миронович",
                 LastName = "Кузнецов",
@@ -56,7 +48,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 4,
+                Id = IdGen.Get(),
                 FirstName = "Тимур",
                 MiddleName = "Николаевич",
                 LastName = "Трофимов",
@@ -66,7 +58,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 5,
+                Id = IdGen.Get(),
                 FirstName = "Мирослава",
                 MiddleName = "Степановна",
                 LastName = "Смирнова",
@@ -76,7 +68,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 6,
+                Id = IdGen.Get(),
                 FirstName = "Иван",
                 MiddleName = "Георгиевич",
                 LastName = "Захаров",
@@ -86,7 +78,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 7,
+                Id = IdGen.Get(),
                 FirstName = "Виктория",
                 MiddleName = "Никитична",
                 LastName = "Колесникова",
@@ -96,7 +88,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 8,
+                Id = IdGen.Get(),
                 FirstName = "Ева",
                 MiddleName = "Фёдоровна",
                 LastName = "Никитина",
@@ -106,7 +98,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 9,
+                Id = IdGen.Get(),
                 FirstName = "Марк",
                 MiddleName = "Кириллович",
                 LastName = "Куликов",
@@ -116,26 +108,39 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             },
             new()
             {
-                Id = 10,
+                Id = IdGen.Get(),
                 FirstName = "Мария",
                 MiddleName = "Никитична",
                 LastName = "Быкова",
                 BirthDay = DateTime.Parse("11/23/1987", Culture),
                 HiringDate = DateTime.Parse("10/10/2010", Culture),
                 Email = "ololo10@example.com"
-            },
+            }
         });
 
-        public Task<EmployeeViewModel> GetByIdAsync(long employeeId)
+        public Task<EmployeeViewModel> GetByIdAsync(long employeeId, CancellationToken cancellationToken = default)
         {
             var result = Items.FirstOrDefault(x => x.Id == employeeId);
             return Task.FromResult(result);
         }
 
-        public Task<EmployeeViewModel> FindByEmailAsync(string employeeEmail)
+        public Task<EmployeeViewModel> FindByEmailAsync(
+            string employeeEmail,
+            CancellationToken cancellationToken = default)
         {
             var result = Items.FirstOrDefault(x => x.Email == employeeEmail);
             return Task.FromResult(result);
+        }
+
+        public class EmployeeViewModel
+        {
+            public long Id { get; init; }
+            public string FirstName { get; init; }
+            public string LastName { get; init; }
+            public string MiddleName { get; init; }
+            public DateTime BirthDay { get; init; }
+            public DateTime HiringDate { get; init; }
+            public string Email { get; init; }
         }
     }
 }
