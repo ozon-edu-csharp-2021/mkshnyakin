@@ -33,7 +33,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         {
             var employeeId = requestForEmployeeId.EmployeeId;
             var employeeViewModel = await _employeeClient.GetByIdAsync(employeeId, cancellationToken)
-                                    ?? throw new EmployeeNotFoundException($"Employee (id:{employeeId}) is not found");
+                                    ?? throw new ItemNotFoundException($"Employee (id:{employeeId}) is not found");
 
             var employee = new Employee(
                 employeeViewModel.Id,
@@ -46,6 +46,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
 
             var merchType = requestForEmployeeId.MerchType.ToRequestMerchType();
             var merchItems = await _merchPackItemRepository.FindByMerchTypeAsync(merchType, cancellationToken);
+
+            var merchRequests =
+                _merchRequestRepository.FindByRequestMerchTypeAsync(RequestMerchType.WelcomePack, cancellationToken);
 
             /*
             var stockInDb = await _stockItemRepository.FindBySkuAsync(new Sku(request.Sku), cancellationToken);
@@ -92,7 +95,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         {
             var employeeEmail = requestForEmployeeId.EmployeeEmail;
             var employeeViewModel = await _employeeClient.FindByEmailAsync(employeeEmail.Value, cancellationToken)
-                                    ?? throw new EmployeeNotFoundException(
+                                    ?? throw new ItemNotFoundException(
                                         $"Employee (email:{employeeEmail}) is not found");
 
             

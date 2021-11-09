@@ -10,7 +10,7 @@ namespace OzonEdu.MerchandiseService.Domain.DomainServices
     {
         public static MerchRequest CreateMerchandizeRequest(Employee employee, IEnumerable<MerchPackItem> merchItems)
         {
-            var request = new MerchRequest();
+            //var request = new MerchRequest();
             /*
             var request = new MerchandizeRequest(employee.Id, employee.PhoneNumber);
 
@@ -25,7 +25,8 @@ namespace OzonEdu.MerchandiseService.Domain.DomainServices
             responsibleManager.AssignTask();
             */
 
-            return request;
+            //return request;
+            return null;
         }
     }
 }

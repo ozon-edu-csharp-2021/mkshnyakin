@@ -17,7 +17,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
         {
             return IsValid(itemName)
                 ? new ItemName(itemName)
-                : throw new CorruptedValueObjectException($"ItemName is invalid: '{itemName}'");
+                : throw new CorruptedValueObjectException($"{nameof(ItemName)} is invalid: '{itemName}'");
         }
 
         public override string ToString()

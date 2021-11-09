@@ -49,7 +49,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 }
                 .ToImmutableDictionary();
 
-        public Task<MerchPackItem> CreateAsync(MerchPackItem itemToCreate,
+        public Task<MerchPackItem> CreateAsync(MerchPackItem merchRequest,
             CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();

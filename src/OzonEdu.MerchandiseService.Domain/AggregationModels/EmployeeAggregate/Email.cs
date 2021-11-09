@@ -26,7 +26,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
         {
             return IsValid(emailString)
                 ? new Email(emailString)
-                : throw new CorruptedValueObjectException($"Email is invalid: '{emailString}'");
+                : throw new CorruptedValueObjectException($"{nameof(Email)} is invalid: '{emailString}'");
         }
 
         public override string ToString()

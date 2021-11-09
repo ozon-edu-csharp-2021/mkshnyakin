@@ -4,8 +4,8 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
 {
     public sealed class CreationMode : Enumeration
     {
-        public static CreationMode Auto = new(1, nameof(Auto));
-        public static CreationMode Manual = new(2, nameof(Manual));
+        public static CreationMode System = new(1, nameof(System));
+        public static CreationMode User = new(2, nameof(User));
 
         public CreationMode(int id, string name) : base(id, name)
         {

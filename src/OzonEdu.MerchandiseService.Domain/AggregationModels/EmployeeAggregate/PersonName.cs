@@ -22,7 +22,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate
             return IsValid(firstName, middleName, lastName)
                 ? new PersonName(firstName, middleName, lastName)
                 : throw new CorruptedValueObjectException(
-                    $"PersonName is invalid. FirstName: '{firstName}'. MiddleName: '{middleName}'. LastName: '{lastName}'");
+                    $"{nameof(PersonName)} is invalid. FirstName: '{firstName}'. MiddleName: '{middleName}'. LastName: '{lastName}'");
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
