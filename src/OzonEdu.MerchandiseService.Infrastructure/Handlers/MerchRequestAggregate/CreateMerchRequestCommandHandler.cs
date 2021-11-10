@@ -12,7 +12,7 @@ using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate
 {
-    public class CreateMerchRequestCommandHandler : IRequestHandler<CreateMerchRequestForEmployeeIdCommand, CreateMerchRequestResponse>
+    public class CreateMerchRequestCommandHandler : IRequestHandler<CreateMerchRequestForEmployeeIdCommand, MerchRequestResult>
     {
         private readonly IOzonEduEmployeeServiceClient _employeeClient;
         private readonly IMerchRequestRepository _merchRequestRepository;
@@ -28,7 +28,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             _merchPackItemRepository = merchPackItemRepository;
         }
 
-        public async Task<CreateMerchRequestResponse> Handle(CreateMerchRequestForEmployeeIdCommand requestForEmployeeId,
+        public async Task<MerchRequestResult> Handle(CreateMerchRequestForEmployeeIdCommand requestForEmployeeId,
             CancellationToken cancellationToken)
         {
             var employeeId = requestForEmployeeId.EmployeeId;
@@ -73,7 +73,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             
             return newStockItem.Id;
             */
-            var response = new CreateMerchRequestResponse{};
+            var response = new MerchRequestResult{};
             return await Task.FromResult(response);
 
         }
@@ -81,7 +81,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
 
     public class
         CreateMerchRequestForEmployeeEmailCommandHandler : IRequestHandler<CreateMerchRequestForEmployeeEmailCommand,
-            CreateMerchRequestResponse>
+            MerchRequestResult>
     {
         private readonly IOzonEduEmployeeServiceClient _employeeClient;
 
@@ -90,7 +90,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             _employeeClient = employeeClient;
         }
 
-        public async Task<CreateMerchRequestResponse> Handle(CreateMerchRequestForEmployeeEmailCommand requestForEmployeeId,
+        public async Task<MerchRequestResult> Handle(CreateMerchRequestForEmployeeEmailCommand requestForEmployeeId,
             CancellationToken cancellationToken)
         {
             var employeeEmail = requestForEmployeeId.EmployeeEmail;
@@ -132,7 +132,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             
             return newStockItem.Id;
             */
-            var response = new CreateMerchRequestResponse{};
+            var response = new MerchRequestResult{};
             return await Task.FromResult(response);
         }
     }

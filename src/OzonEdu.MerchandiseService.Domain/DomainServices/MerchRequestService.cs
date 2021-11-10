@@ -1,32 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.Linq;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 
 namespace OzonEdu.MerchandiseService.Domain.DomainServices
 {
-    public class MerchRequestService
+    public sealed class MerchRequestService
     {
-        public static MerchRequest CreateMerchandizeRequest(Employee employee, IEnumerable<MerchPackItem> merchItems)
+        /// <summary>
+        /// Создание запроса на выдачу мерча от пользователся
+        /// </summary>
+        /// <param name="employee">Сотрудник</param>
+        /// <param name="requestMerchType">Тип запрашиваемого мерча</param>
+        /// <param name="employeeMerchRequests">Все имеющиеся запросы сотрудника на выдачу мерча</param>
+        /// <param name="currentDate">Текущая дата</param>
+        /// <returns>Новый запрос или null при ошибке</returns>
+        public static MerchRequest ProcessUserMerchRequest(
+            Employee employee,
+            RequestMerchType requestMerchType,
+            IEnumerable<MerchRequest> employeeMerchRequests,
+            Date currentDate)
         {
-            //var request = new MerchRequest();
-            /*
-            var request = new MerchandizeRequest(employee.Id, employee.PhoneNumber);
+            var firstIncomplete = employeeMerchRequests.FirstOrDefault(x =>
+                x.MerchType.Equals(requestMerchType)
+                && !x.Status.Equals(ProcessStatus.Complete));
 
-            if (!managers.Any(m => m.CanHandleNewTask))
+            if (firstIncomplete != default)
             {
-                throw new Exception("No vacant managers");
+                return firstIncomplete;
             }
 
-            var responsibleManager = managers.OrderBy(m => m.AssignedTasks).First();
+            var yearAgo = currentDate.Value - TimeSpan.FromDays(365);
+            var firstLessThanYear = employeeMerchRequests.FirstOrDefault(x =>
+                x.MerchType.Equals(requestMerchType)
+                && x.Status.Equals(ProcessStatus.Complete)
+                && x.GiveOutDate.Value > yearAgo);
 
-            request.AssignTo(responsibleManager.Id);
-            responsibleManager.AssignTask();
-            */
+            if (firstLessThanYear != default)
+            {
+                return firstLessThanYear;
+            }
 
-            //return request;
-            return null;
+            var result = new MerchRequest(EmployeeId.Create(employee.Id), requestMerchType, CreationMode.User);
+            return result;
         }
     }
 }

@@ -7,10 +7,10 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
     {
         public MerchRequest(EmployeeId employeeId, RequestMerchType merchType, CreationMode mode)
         {
-            EmployeeId = employeeId;
-            MerchType = merchType;
+            EmployeeId = employeeId ?? throw new CorruptedInvariantException($"{nameof(employeeId)} is null");
+            MerchType = merchType ?? throw new CorruptedInvariantException($"{nameof(merchType)} is null");
+            Mode = mode ?? throw new CorruptedInvariantException($"{nameof(mode)} is null");
             Status = ProcessStatus.Draft;
-            Mode = mode;
         }
 
         public MerchRequest(
@@ -54,7 +54,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
 
         public override string ToString()
         {
-            return $"Id: {Id}. EmployeeId: {EmployeeId}. {Status}. {Mode}. {MerchType}. {GiveOutDate}";
+            return $"Id: {Id}. {EmployeeId}. {Status}. {Mode}. {MerchType}. {GiveOutDate}";
         }
     }
 }

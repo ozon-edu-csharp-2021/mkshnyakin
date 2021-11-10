@@ -4,7 +4,7 @@ using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate
 {
-    public class CreateMerchRequestForEmployeeEmailCommand : IRequest<CreateMerchRequestResponse>
+    public class CreateMerchRequestForEmployeeEmailCommand : IRequest<MerchRequestResult>
     {
         public Email EmployeeEmail { get; init; }
         public MerchType MerchType { get; init; }

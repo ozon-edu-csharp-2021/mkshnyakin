@@ -1,4 +1,5 @@
-﻿using OzonEdu.MerchandiseService.Domain.Models;
+﻿using OzonEdu.MerchandiseService.Domain.Exceptions;
+using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate
 {
@@ -6,8 +7,8 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
     {
         public MerchPackItem(ItemName itemName, Sku sku)
         {
-            ItemName = itemName;
-            Sku = sku;
+            ItemName = itemName ?? throw new CorruptedInvariantException($"{nameof(itemName)} is null");
+            Sku = sku ?? throw new CorruptedInvariantException($"{nameof(sku)} is null");
         }
         
         public MerchPackItem(long id, ItemName itemName, Sku sku) : this(itemName, sku)

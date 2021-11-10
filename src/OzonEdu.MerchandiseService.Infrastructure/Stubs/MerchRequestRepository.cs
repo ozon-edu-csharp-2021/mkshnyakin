@@ -16,28 +16,67 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
         public MerchRequestRepository()
         {
             {
-                var merchRequest =
-                    new MerchRequest(EmployeeId.Create(1), RequestMerchType.WelcomePack, CreationMode.User);
-                merchRequest.Complete(Date.Create("11/23/2021 13:14:00"));
-                Create(merchRequest);
-            }
-            
-            {
-                var merchRequest =
-                    new MerchRequest(EmployeeId.Create(2), RequestMerchType.ConferenceListenerPack, CreationMode.User);
-                merchRequest.Complete(Date.Create("10/15/2021 08:05:01"));
-                Create(merchRequest);
-            }
-            
-            
-            {
-                var merchRequest =
-                    new MerchRequest(EmployeeId.Create(2), RequestMerchType.ConferenceListenerPack, CreationMode.User);
-                merchRequest.Complete(Date.Create("10/15/2021 08:05:01"));
-                Create(merchRequest);
+                var employee1 = EmployeeId.Create(1);
+                {
+                    var merchRequest = new MerchRequest(employee1, RequestMerchType.WelcomePack, CreationMode.System);
+                    merchRequest.Complete(Date.Create("11/23/2021 13:14:00"));
+                    Create(merchRequest);
+                }
+                {
+                    var merchRequest =
+                        new MerchRequest(employee1, RequestMerchType.ConferenceListenerPack, CreationMode.User);
+                    merchRequest.Complete(Date.Create("10/15/2021 08:05:01"));
+                    Create(merchRequest);
+                }
             }
 
+            {
+                var employee2 = EmployeeId.Create(2);
+                {
+                    var merchRequest =
+                        new MerchRequest(employee2, RequestMerchType.ConferenceListenerPack, CreationMode.User);
+                    merchRequest.Complete(Date.Create("10/15/2021 08:05:01"));
+                    Create(merchRequest);
+                }
+                {
+                    var merchRequest =
+                        new MerchRequest(employee2, RequestMerchType.ConferenceSpeakerPack, CreationMode.User);
+                    merchRequest.SetStatus(ProcessStatus.OutOfStock);
+                    Create(merchRequest);
+                }
+            }
+            
+            // Мерч для сотрудника выдавался больше года назад
+            {
+                var employee3 = EmployeeId.Create(3);
+                {
+                    var merchRequest = new MerchRequest(employee3, RequestMerchType.WelcomePack, CreationMode.User);
+                    merchRequest.Complete(Date.Create("10/15/2019 08:05:01"));
+                    Create(merchRequest);
+                }
+            }
+            
+            // Мерч для сотрудника выдавался меньше года назад
+            {
+                var employee4 = EmployeeId.Create(4);
+                {
+                    var merchRequest = new MerchRequest(employee4, RequestMerchType.WelcomePack, CreationMode.User);
+                    merchRequest.Complete(Date.Create("11/11/2021 08:05:01"));
+                    Create(merchRequest);
+                }
+            }         
+            
+            // Мерч для сотрудника в OutOfStock
+            {
+                var employee5 = EmployeeId.Create(5);
+                {
+                    var merchRequest = new MerchRequest(employee5, RequestMerchType.WelcomePack, CreationMode.User);                    
+                    merchRequest.SetStatus(ProcessStatus.OutOfStock);
+                    Create(merchRequest);
+                }
+            }
         }
+
 
         private MerchRequest Create(MerchRequest merchRequest, CancellationToken cancellationToken = default)
         {
@@ -76,11 +115,29 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             throw new System.NotImplementedException();
         }
 
+        public Task<IEnumerable<MerchRequest>> FindByEmployeeIdAsync(
+            long employeeId,
+            CancellationToken cancellationToken = default)
+        {
+            var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId);
+            return Task.FromResult(result);
+        }
+        
         public Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
             var result = Items.Values.Where(x => x.MerchType.Equals(requestMerchType));
+            return Task.FromResult(result);
+        }
+
+        public Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
+            long employeeId,
+            CancellationToken cancellationToken = default)
+        {
+            var result = Items.Values.Where(x =>
+                x.EmployeeId.Value.Equals(employeeId)
+                && x.Status.Equals(ProcessStatus.Complete));
             return Task.FromResult(result);
         }
     }

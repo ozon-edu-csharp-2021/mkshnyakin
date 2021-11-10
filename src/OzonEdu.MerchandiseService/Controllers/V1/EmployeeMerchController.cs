@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
@@ -17,8 +16,8 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     [Produces("application/json")]
     public class EmployeeMerchController : ControllerBase
     {
-        private readonly IMerchForEmployeesService _merchForEmployeesService;
         private readonly IMediator _mediator;
+        private readonly IMerchForEmployeesService _merchForEmployeesService;
 
         public EmployeeMerchController(
             IMerchForEmployeesService merchForEmployeesMerchForEmployeesService,
@@ -29,7 +28,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         }
 
         /// <summary>
-        /// Запрос ранее выданного мерча сотруднику
+        ///     Запрос ранее выданного мерча сотруднику
         /// </summary>
         /// <param name="employeeId">Идентификатор сотрудника</param>
         /// <param name="token"></param>
@@ -41,6 +40,37 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             int employeeId,
             CancellationToken token)
         {
+            var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
+            {
+                EmployeeId = employeeId
+            };
+            var historyItems = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
+            
+            if (!historyItems.Any())
+            {
+                var notFoundResponse = new RestErrorResponse
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Message = $"Merch history not found for employee {employeeId}"
+                };
+                return NotFound(notFoundResponse);
+            }
+
+            var response = new EmployeeMerchGetResponse
+            {
+                Items = historyItems
+                    .Select(x => new EmployeeMerchGetResponseItem
+                    {
+                        Item = new EmployeeMerchItem
+                        {
+                            Name = x.Item.ItemName.Value,
+                            SkuId = x.Item.Sku.Id
+                        },
+                        Date = x.GiveOutDate.Value
+                    })
+            };
+
+            /*
             var items = await _merchForEmployeesService.GetHistoryForEmployee(employeeId, token);
             if (items is null)
             {
@@ -65,12 +95,13 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                         Date = x.Date
                     })
             };
+            */
 
             return Ok(response);
         }
 
         /// <summary>
-        /// Запрос на выдачу мерча для сотрудника
+        ///     Запрос на выдачу мерча для сотрудника
         /// </summary>
         /// <param name="employeeId">Идентификатор сотрудника</param>
         /// <param name="merchType">Тип мерча. Если пустой, то WelcomePack (10)</param>
@@ -85,13 +116,13 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             MerchType merchType,
             CancellationToken token)
         {
-            var createMerchRequestForEmployeeIdCommand = new CreateMerchRequestForEmployeeIdCommand
+            var processUserMerchRequestCommand = new ProcessUserMerchRequestCommand
             {
                 EmployeeId = employeeId,
-                MerchType = merchType
+                MerchType = merchType,
             };
-            var result = await _mediator.Send(createMerchRequestForEmployeeIdCommand, token);
-            
+            var result = await _mediator.Send(processUserMerchRequestCommand, token);
+
             var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
             if (items is null)
             {

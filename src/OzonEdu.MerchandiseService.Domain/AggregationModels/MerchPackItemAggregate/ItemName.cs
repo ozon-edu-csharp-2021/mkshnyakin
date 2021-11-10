@@ -32,7 +32,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
 
         private static bool IsValid(string itemName)
         {
-            return !string.IsNullOrEmpty(itemName);
+            return !string.IsNullOrWhiteSpace(itemName);
         }
     }
 }

@@ -20,10 +20,13 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.AggregationModels.MerchRequest
             "2009-05-01 14:57:32.8",
             "2016-1-1 1:1:1",
             "2009-05-01T14:57:32.8375298-04:00",
+            "2021-10-10T11:50:19.324Z",
+            "2021-10-15T08:05:01",
             "5/01/2008",
             "5/01/2008 14:57:32.80 -07:00",
             "1 May 2008 2:57:32.8 PM",
-            "Fri, 15 May 2009 20:10:57 GMT"
+            "Fri, 15 May 2009 20:10:57 GMT",
+            "Wed,10 Nov 2021 11:09:59 GMT"
         }.Select(e => new object[] {e});
 
         public static IEnumerable<object[]> InvalidDates => new[]
@@ -33,19 +36,16 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.AggregationModels.MerchRequest
             "ololo",
             "-1",
             "1+2",
-
             "20211123",
             "2021/11/32",
             "2021/13/23",
             "2021/13/32",
             "16-05-2009 1:00:32 PM",
-
             "11/23/2021 13:60:01",
             "11/23/2021 24:14:01",
             "11/23/2021 13:00:60",
             "15/23/2021 13:14:01",
             "11/35/2021 13:14:01",
-
             "2021-11-23 13:64:01",
             "2021-11-23 25:14:01",
             "2021-11-23 23:14:61",
