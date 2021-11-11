@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Compression;
 using System.Linq;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 
 namespace OzonEdu.MerchandiseService.Domain.DomainServices
@@ -11,10 +9,11 @@ namespace OzonEdu.MerchandiseService.Domain.DomainServices
     public sealed class MerchRequestService
     {
         /// <summary>
-        /// Создание запроса на выдачу мерча от пользователся
+        ///     Создание запроса на выдачу мерча от пользователся
         /// </summary>
         /// <param name="employee">Сотрудник</param>
         /// <param name="requestMerchType">Тип запрашиваемого мерча</param>
+        /// <param name="creationMode">Способ создания запроса</param>
         /// <param name="employeeMerchRequests">Все имеющиеся запросы сотрудника на выдачу мерча</param>
         /// <param name="currentDate">Текущая дата</param>
         /// <returns>Новый запрос или null при ошибке</returns>

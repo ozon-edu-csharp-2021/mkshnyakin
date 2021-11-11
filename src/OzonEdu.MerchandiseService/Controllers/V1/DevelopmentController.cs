@@ -2,9 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
+using CSharpCourse.Core.Lib.Events;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
@@ -76,6 +78,20 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [Route("ship-supply")]
         public async Task<ActionResult> ShipSupply(CancellationToken token)
         {
+            var processUserMerchRequestCommand = new ProcessSupplyEventCommand()
+            {
+                Items = new SupplyShippedItem[]
+                {
+                    new() {SkuId = 2, Quantity = 10}, // ConferenceListenerPack, ConferenceSpeakerPack
+                    new() {SkuId = 4, Quantity = 10}, // ProbationPeriodEndingPack
+                    new() {SkuId = 5, Quantity = 10}, // ProbationPeriodEndingPack
+                    new() {SkuId = 6, Quantity = 10}, // VeteranPack
+                    new() {SkuId = 7, Quantity = 10}, // VeteranPack
+                    new() {SkuId = 8, Quantity = 10},
+                }
+            };
+            await _mediator.Send(processUserMerchRequestCommand, token);
+
             return Ok();
         }
     }

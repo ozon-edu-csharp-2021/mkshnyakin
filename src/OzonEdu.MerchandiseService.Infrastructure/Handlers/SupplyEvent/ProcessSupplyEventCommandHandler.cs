@@ -8,7 +8,6 @@ using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
-using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
 {

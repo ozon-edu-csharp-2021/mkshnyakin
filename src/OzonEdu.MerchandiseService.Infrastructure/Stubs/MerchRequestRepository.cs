@@ -74,6 +74,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     merchRequest.SetStatus(ProcessStatus.OutOfStock);
                     Create(merchRequest);
                 }
+                {
+                    var merchRequest = new MerchRequest(employee5, RequestMerchType.ConferenceListenerPack, CreationMode.System);
+                    merchRequest.SetStatus(ProcessStatus.OutOfStock);
+                    Create(merchRequest);
+                }
             }
         }
 
