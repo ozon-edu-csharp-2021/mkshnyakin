@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 using OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate;
@@ -27,6 +28,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             services.AddSingleton<IMerchRequestRepository, MerchRequestRepository>();
             services.AddSingleton<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceClient>();
             services.AddSingleton<IOzonEduStockApiClient, OzonEduStockApiClient>();
+            services.AddSingleton<IApplicationService, ApplicationService>();
             return services;
         }
 

@@ -10,6 +10,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Contracts
             long employeeId,
             CancellationToken cancellationToken = default);
 
+        Task<OzonEduEmployeeServiceClient.EmployeeViewModel> GetByEmailAsync(
+            string email,
+            CancellationToken cancellationToken = default);
+        
         Task<OzonEduEmployeeServiceClient.EmployeeViewModel> FindByEmailAsync(
             string employeeEmail,
             CancellationToken cancellationToken = default);

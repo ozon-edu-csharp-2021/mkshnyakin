@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OzonEdu.MerchandiseService.HttpModels;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
@@ -111,17 +113,31 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [Route("{merchType}")]
         [ProducesResponseType(typeof(EmployeeMerchPostResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
             int employeeId,
             MerchType merchType,
             CancellationToken token)
         {
-            var processUserMerchRequestCommand = new ProcessUserMerchRequestCommand
+            var processUserMerchRequestCommand = new ProcessMerchRequestCommand
             {
                 EmployeeId = employeeId,
                 MerchType = merchType,
+                IsSystem = false
             };
-            var result = await _mediator.Send(processUserMerchRequestCommand, token);
+            try
+            {
+                var result = await _mediator.Send(processUserMerchRequestCommand, token);
+            }
+            catch (ItemNotFoundException e)
+            {
+                var notFoundResponse = new RestErrorResponse
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Message = e.Message
+                };
+                return NotFound(notFoundResponse);
+            }
 
             var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
             if (items is null)

@@ -2,11 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
-using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 using static OzonEdu.MerchandiseService.Domain.DomainServices.MerchRequestService;
@@ -14,47 +12,39 @@ using static OzonEdu.MerchandiseService.Domain.DomainServices.MerchRequestServic
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate
 {
     public class ProcessUserMerchRequestCommandHandler
-        : IRequestHandler<ProcessUserMerchRequestCommand, MerchRequestResult>
+        : IRequestHandler<ProcessMerchRequestCommand, MerchRequestResult>
     {
-        private readonly IOzonEduEmployeeServiceClient _employeeClient;
-        private readonly IMerchPackItemRepository _merchPackItemRepository;
+        private readonly IApplicationService _applicationService;
         private readonly IMerchRequestRepository _merchRequestRepository;
 
         public ProcessUserMerchRequestCommandHandler(
             IMerchRequestRepository merchRequestRepository,
-            IOzonEduEmployeeServiceClient employeeClient,
-            IMerchPackItemRepository merchPackItemRepository)
+            IApplicationService applicationService)
         {
             _merchRequestRepository = merchRequestRepository;
-            _employeeClient = employeeClient;
-            _merchPackItemRepository = merchPackItemRepository;
+            _applicationService = applicationService;
         }
 
         public async Task<MerchRequestResult> Handle(
-            ProcessUserMerchRequestCommand requestForEmployeeId,
+            ProcessMerchRequestCommand command,
             CancellationToken cancellationToken)
         {
-            var employeeId = requestForEmployeeId.EmployeeId;
-            var employeeViewModel = await _employeeClient.GetByIdAsync(employeeId, cancellationToken)
-                                    ?? throw new ItemNotFoundException($"Employee (id:{employeeId}) is not found");
+            var requestMerchType = command.MerchType.ToRequestMerchType();
+            var creationMode = command.IsSystem ? CreationMode.System : CreationMode.User;
+            var employeeEmail = command.EmployeeEmail;
+            var employeeId = command.EmployeeId;
 
-            var employee = new Employee(
-                employeeViewModel.Id,
-                PersonName.Create(
-                    employeeViewModel.FirstName,
-                    employeeViewModel.MiddleName,
-                    employeeViewModel.LastName),
-                Email.Create(employeeViewModel.Email)
-            );
-
-            var requestMerchType = requestForEmployeeId.MerchType.ToRequestMerchType();
+            var employee = await _applicationService.GetEmployee(employeeId, employeeEmail, cancellationToken)
+                           ?? throw new ItemNotFoundException(
+                               $"Employee (id:{employeeId}, email: {employeeEmail}) is not found");
 
             var employeeMerchRequests =
-                await _merchRequestRepository.FindByEmployeeIdAsync(employeeId, cancellationToken);
+                await _applicationService.GetEmployeeMerchRequests(employee.Id, cancellationToken);
 
             var request = ProcessUserMerchRequest(
                 employee,
                 requestMerchType,
+                creationMode,
                 employeeMerchRequests,
                 Date.Create(DateTime.Now));
 
@@ -64,23 +54,37 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                 return MerchRequestResult.Fail("ololo");
             }
 
-            // Если Draft или OutOfStock, То проводим по сценарию 
-            if (request.Status.Equals(ProcessStatus.Draft) || request.Status.Equals(ProcessStatus.OutOfStock))
+
+            // Проверяется наличие данного мерча на складе через запрос к stock-api
+            // Если все проверки прошли - зарезервировать мерч в stock-api
+            var isComplete = await _applicationService.CheckAndReserve(request, cancellationToken);
+            if (isComplete)
             {
-                // Проверяется наличие данного мерча на складе через запрос к stock-api
-                // Если все проверки прошли - зарезервировать мерч в stock-api
-                
-                var merchItems =
-                    await _merchPackItemRepository.FindByMerchTypeAsync(requestMerchType, cancellationToken);
-                
                 // Отметить у себя в БД, что сотруднику выдан мерч
-                
+                request.Complete(Date.Create(DateTime.Now));
+            }
+            else
+            {
                 //Если мерча нет в наличии - необходимо запомнить, что такой сотрудник запрашивал такой мерч
+                request.SetStatus(ProcessStatus.OutOfStock);
             }
 
+            await SaveRequest(request, cancellationToken);
 
             var response = new MerchRequestResult();
             return await Task.FromResult(response);
+        }
+
+        private async Task SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
+        {
+            if (merchRequest.Id == 0)
+            {
+                await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+            }
+            else
+            {
+                await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+            }
         }
     }
 }

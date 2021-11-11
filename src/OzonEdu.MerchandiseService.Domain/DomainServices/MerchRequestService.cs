@@ -21,6 +21,7 @@ namespace OzonEdu.MerchandiseService.Domain.DomainServices
         public static MerchRequest ProcessUserMerchRequest(
             Employee employee,
             RequestMerchType requestMerchType,
+            CreationMode creationMode,
             IEnumerable<MerchRequest> employeeMerchRequests,
             Date currentDate)
         {
@@ -44,7 +45,7 @@ namespace OzonEdu.MerchandiseService.Domain.DomainServices
                 return firstLessThanYear;
             }
 
-            var result = new MerchRequest(EmployeeId.Create(employee.Id), requestMerchType, CreationMode.User);
+            var result = new MerchRequest(EmployeeId.Create(employee.Id), requestMerchType, creationMode);
             return result;
         }
     }

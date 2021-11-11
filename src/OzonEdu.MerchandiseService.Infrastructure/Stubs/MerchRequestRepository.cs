@@ -107,7 +107,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 
         public Task<MerchRequest> UpdateAsync(MerchRequest itemToUpdate, CancellationToken cancellationToken = default)
         {
-            throw new System.NotImplementedException();
+            Items[itemToUpdate.Id] = itemToUpdate;
+            return Task.FromResult(Items[itemToUpdate.Id]);
         }
 
         public Task<MerchRequest> DeleteAsync(MerchRequest itemToUpdate, CancellationToken cancellationToken = default)
