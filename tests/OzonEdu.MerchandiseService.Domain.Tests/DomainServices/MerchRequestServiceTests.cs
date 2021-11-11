@@ -68,9 +68,9 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.DomainServices
             var mode = CreationMode.User;
             var employeeId = EmployeeId.Create(employee.Id);
             var minDate = Date.Create(DateTime.MinValue);
-            var monthAgo = Date.Create(DateTime.Now - TimeSpan.FromDays(300));
+            var month11Ago = Date.Create(DateTime.Now.AddMonths(-11));
             var merchRequest1 = new MerchRequest(1, employeeId, merchType, ProcessStatus.Complete, mode, minDate);
-            var merchRequest2 = new MerchRequest(2, employeeId, merchType, ProcessStatus.Complete, mode, monthAgo);
+            var merchRequest2 = new MerchRequest(2, employeeId, merchType, ProcessStatus.Complete, mode, month11Ago);
             var employeeMerchRequests = new[] {merchRequest1, merchRequest2};
             var date = Date.Create(DateTime.Now);
 
@@ -92,9 +92,9 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.DomainServices
             var mode = CreationMode.User;
             var employeeId = EmployeeId.Create(employee.Id);
             var minDate = Date.Create(DateTime.MinValue);
-            var monthAgo = Date.Create(DateTime.Now - TimeSpan.FromDays(500));
+            var month13Ago = Date.Create(DateTime.Now.AddMonths(-13));
             var merchRequest1 = new MerchRequest(1, employeeId, merchType, ProcessStatus.Complete, mode, minDate);
-            var merchRequest2 = new MerchRequest(2, employeeId, merchType, ProcessStatus.Complete, mode, monthAgo);
+            var merchRequest2 = new MerchRequest(2, employeeId, merchType, ProcessStatus.Complete, mode, month13Ago);
             var employeeMerchRequests = new[] {merchRequest1, merchRequest2};
             var date = Date.Create(DateTime.Now);
 

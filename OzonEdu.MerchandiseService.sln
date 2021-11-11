@@ -7,6 +7,7 @@ ProjectSection(SolutionItems) = preProject
 	Dockerfile = Dockerfile
 	.editorconfig = .editorconfig
 	.dockerignore = .dockerignore
+	bounded-context-canvas.drawio = bounded-context-canvas.drawio
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34C94014-E3FD-40EC-B6C0-8CCC003109FA}"
