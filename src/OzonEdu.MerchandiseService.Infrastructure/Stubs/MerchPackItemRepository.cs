@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 {
@@ -55,7 +57,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             throw new NotImplementedException();
         }
 
-        public Task<MerchPackItem> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task<MerchPackItem> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -89,6 +91,27 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             MerchPackStubs.TryGetValue(merchType, out var value);
             IReadOnlyList<MerchPackItem> items = value;
             return Task.FromResult(items);
+        }
+
+        public Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(
+            IEnumerable<long> skuIds,
+            CancellationToken cancellationToken = default)
+        {
+            var merchTypes = new Dictionary<MerchType, bool>();
+            foreach (var skuId in skuIds)
+            {
+                foreach (var kvp in MerchPackStubs)
+                {
+                    var merchType = kvp.Key;
+                    if (kvp.Value.Any(x => x.Sku.Id == skuId))
+                    {
+                        merchTypes[merchType] = true;
+                    }
+                }
+            }
+
+            var result = merchTypes.Select(x => x.Key.ToRequestMerchType());
+            return Task.FromResult(result);
         }
     }
 }

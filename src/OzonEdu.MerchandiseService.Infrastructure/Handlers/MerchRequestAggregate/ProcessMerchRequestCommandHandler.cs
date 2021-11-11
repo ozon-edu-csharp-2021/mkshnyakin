@@ -11,13 +11,13 @@ using static OzonEdu.MerchandiseService.Domain.DomainServices.MerchRequestServic
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate
 {
-    public class ProcessUserMerchRequestCommandHandler
+    public class ProcessMerchRequestCommandHandler
         : IRequestHandler<ProcessMerchRequestCommand, MerchRequestResult>
     {
         private readonly IApplicationService _applicationService;
         private readonly IMerchRequestRepository _merchRequestRepository;
 
-        public ProcessUserMerchRequestCommandHandler(
+        public ProcessMerchRequestCommandHandler(
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService)
         {
@@ -51,13 +51,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             // Проверяется что такой мерч еще не выдавался сотруднику
             if (request.Status.Equals(ProcessStatus.Complete))
             {
-                return MerchRequestResult.Fail("ololo");
+                return MerchRequestResult.Fail(request.Status.ToString(), request.Id);
             }
 
 
             // Проверяется наличие данного мерча на складе через запрос к stock-api
             // Если все проверки прошли - зарезервировать мерч в stock-api
-            var isComplete = await _applicationService.CheckAndReserve(request, cancellationToken);
+            var isComplete = await _applicationService.CheckAndReserve(request, employee, cancellationToken);
             if (isComplete)
             {
                 // Отметить у себя в БД, что сотруднику выдан мерч
@@ -69,22 +69,26 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                 request.SetStatus(ProcessStatus.OutOfStock);
             }
 
-            await SaveRequest(request, cancellationToken);
+            var savedRequest = await SaveRequest(request, cancellationToken);
 
-            var response = new MerchRequestResult();
+            var response = savedRequest.Status.Equals(ProcessStatus.Complete)
+                ? MerchRequestResult.Success(savedRequest.Status.ToString(), savedRequest.Id)
+                : MerchRequestResult.Fail(savedRequest.Status.ToString(), savedRequest.Id);
+
             return await Task.FromResult(response);
         }
 
-        private async Task SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
+        private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
         {
             if (merchRequest.Id == 0)
             {
-                await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+                merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
             }
             else
             {
-                await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+                merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
             }
+            return merchRequest;
         }
     }
 }

@@ -16,14 +16,14 @@ namespace OzonEdu.MerchandiseService.Domain.Contracts
         /// <param name="cancellationToken">Токен для отмены операции. <see cref="CancellationToken"/></param>
         /// <returns>Созданная сущность</returns>
         Task<TAggregationRoot> CreateAsync(TAggregationRoot itemToCreate, CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Получить сущность по Id
         /// </summary>
         /// <param name="id">Идентификатор</param>
         /// <param name="cancellationToken">Токен для отмены операции. <see cref="CancellationToken"/></param>
         /// <returns>Существующая сущность</returns>
-        Task<TAggregationRoot> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<TAggregationRoot> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Обновить существующую сущность

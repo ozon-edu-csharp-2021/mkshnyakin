@@ -22,7 +22,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
         /// <returns>Объект <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddDomainInfrastructure(this IServiceCollection services)
         {
-            services.AddMediatR(typeof(CreateMerchRequestCommandHandler).Assembly);
+            services.AddMediatR(typeof(ProcessMerchRequestCommandHandler).Assembly);
             services.AddSingleton<IMessageBus, MessageBus>();
             services.AddSingleton<IMerchPackItemRepository, MerchPackItemRepository>();
             services.AddSingleton<IMerchRequestRepository, MerchRequestRepository>();

@@ -18,5 +18,9 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
         Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default);
+
+        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+            IEnumerable<RequestMerchType> requestMerchTypes,
+            CancellationToken cancellationToken = default);
     }
 }

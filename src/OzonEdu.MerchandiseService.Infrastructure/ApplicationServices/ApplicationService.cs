@@ -26,7 +26,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default);
 
-        Task<bool> CheckAndReserve(MerchRequest request, CancellationToken cancellationToken = default);
+        Task<bool> CheckAndReserve(
+            MerchRequest request,
+            Employee employee,
+            CancellationToken cancellationToken = default);
     }
 
     public sealed class ApplicationService : IApplicationService
@@ -34,8 +37,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
         private readonly IOzonEduEmployeeServiceClient _employeeClient;
         private readonly IMerchPackItemRepository _merchPackItemRepository;
         private readonly IMerchRequestRepository _merchRequestRepository;
-        private readonly IMessageBus _messageBus;
         private readonly IOzonEduStockApiClient _ozonEduStockApiClient;
+        private readonly IMessageBus _messageBus;
 
         public ApplicationService(
             IOzonEduEmployeeServiceClient employeeClient,
@@ -107,7 +110,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
             }
         }
 
-        public async Task<bool> CheckAndReserve(MerchRequest request, CancellationToken cancellationToken = default)
+        public async Task<bool> CheckAndReserve(
+            MerchRequest request,
+            Employee employee,
+            CancellationToken cancellationToken = default)
         {
             var isItemsAvailable = false;
             var isItemsReserved = false;
@@ -133,45 +139,35 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                 throw new ItemNotFoundException("MerchPackItems not reserved because service crashed", e);
             }
 
-            return isItemsAvailable && isItemsReserved;
-        }
-/*
-        /// <summary>
-        /// Создать запрос на выдачу мерча новому сотруднику
-        /// </summary>
-        public GiveMerchResult GiveMerchForNewEmployee(string newEmployeeEmail)
-        {
-            var employee = _employeeClient.FindEmployeeByEmail(newEmployeeEmail);
+            var isAllOk = isItemsAvailable && isItemsReserved;
 
-            if (employee == null)
+            if (request.Mode.Equals(CreationMode.System))
             {
-                return GiveMerchResult.Fail("Employee not found");
-            }
-
-            var managers = _employeeClient.GetVacantManagers().ToList();
-
-            try
-            {
-                var request = DomainService.CreateMerchandizeRequest(employee, managers);
-                //var responsibleManager = managers.First(m => m.Id == request.ResponsibleManagerId);
-
-                //_messageBus.Notify(new EmailMessage(responsibleManager.Email, "Надо выдать мерч"));
-                var employeeEmailMessage = new EmailMessage
+                if (isAllOk)
                 {
-                    ToEmail = employee.Email,
-                    ToName =  employee.Name,
-                    Subject = "Вам будет выдан мерч",
-                    Body = string.Empty
-                };
-                _messageBus.Notify(employeeEmailMessage);
+                    var employeeEmailMessage = new EmailMessage
+                    {
+                        ToEmail = employee.Email.Value,
+                        ToName =  employee.Name.ToString(),
+                        Subject = "Необходимо подойти к HR для получения мерча",
+                        Body = string.Empty
+                    };
+                    _messageBus.Notify(employeeEmailMessage);
+                }
+                else
+                {
+                    var employeeEmailMessage = new EmailMessage
+                    {
+                        ToEmail = "hr@ozon.example.com",
+                        ToName =  "HR department",
+                        Subject = "Мерч закончился и необходимо сделать поставку",
+                        Body = $"Список SkuId: {string.Join(", ", items)}"
+                    };
+                    _messageBus.Notify(employeeEmailMessage);
+                }
+            }
 
-                return GiveMerchResult.Success(request.Status, "Task has been assigned to a manager", request.Id);
-            }
-            catch (Exception e)
-            {
-                return GiveMerchResult.Fail(e.Message);
-            }
+            return isAllOk;
         }
-        */
     }
 }

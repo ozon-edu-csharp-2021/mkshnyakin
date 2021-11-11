@@ -128,6 +128,24 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             try
             {
                 var result = await _mediator.Send(processUserMerchRequestCommand, token);
+                if (!result.IsSuccess)
+                {
+                    var conflictResponse = new RestErrorResponse
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Message = result.Message
+                    };
+                    return Conflict(conflictResponse);
+                }
+                
+                var response = new EmployeeMerchPostResponse
+                {
+                    RequestId = result.RequestId,
+                    Message = result.Message
+                };
+
+                var uri = Url.Action(nameof(GetHistoryForEmployee), new {employeeId});
+                return Created(uri, response);
             }
             catch (ItemNotFoundException e)
             {
@@ -138,29 +156,6 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                 };
                 return NotFound(notFoundResponse);
             }
-
-            var items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, token);
-            if (items is null)
-            {
-                var conflictResponse = new RestErrorResponse
-                {
-                    Status = StatusCodes.Status409Conflict,
-                    Message = $"Merch already given for employee {employeeId}"
-                };
-                return Conflict(conflictResponse);
-            }
-
-            var response = new EmployeeMerchPostResponse
-            {
-                Items = items.Select(x => new EmployeeMerchItem
-                {
-                    Name = x.Name,
-                    SkuId = x.SkuId
-                })
-            };
-
-            var uri = Url.Action(nameof(GetHistoryForEmployee), new {employeeId});
-            return Created(uri, response);
         }
     }
 }

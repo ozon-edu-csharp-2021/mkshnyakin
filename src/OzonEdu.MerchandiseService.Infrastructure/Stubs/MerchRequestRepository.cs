@@ -45,7 +45,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     Create(merchRequest);
                 }
             }
-            
+
             // Мерч для сотрудника выдавался больше года назад
             {
                 var employee3 = EmployeeId.Create(3);
@@ -55,7 +55,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     Create(merchRequest);
                 }
             }
-            
+
             // Мерч для сотрудника выдавался меньше года назад
             {
                 var employee4 = EmployeeId.Create(4);
@@ -64,13 +64,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     merchRequest.Complete(Date.Create("11/11/2021 08:05:01"));
                     Create(merchRequest);
                 }
-            }         
-            
+            }
+
             // Мерч для сотрудника в OutOfStock
             {
                 var employee5 = EmployeeId.Create(5);
                 {
-                    var merchRequest = new MerchRequest(employee5, RequestMerchType.WelcomePack, CreationMode.User);                    
+                    var merchRequest = new MerchRequest(employee5, RequestMerchType.WelcomePack, CreationMode.User);
                     merchRequest.SetStatus(ProcessStatus.OutOfStock);
                     Create(merchRequest);
                 }
@@ -100,9 +100,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(result);
         }
 
-        public Task<MerchRequest> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task<MerchRequest> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            throw new System.NotImplementedException();
+            Items.TryGetValue(id, out var merchRequest);
+            return Task.FromResult(merchRequest);
         }
 
         public Task<MerchRequest> UpdateAsync(MerchRequest itemToUpdate, CancellationToken cancellationToken = default)
@@ -123,7 +124,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId);
             return Task.FromResult(result);
         }
-        
+
         public Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
@@ -139,6 +140,16 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             var result = Items.Values.Where(x =>
                 x.EmployeeId.Value.Equals(employeeId)
                 && x.Status.Equals(ProcessStatus.Complete));
+            return Task.FromResult(result);
+        }
+
+        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+            IEnumerable<RequestMerchType> requestMerchTypes,
+            CancellationToken cancellationToken = default)
+        {
+            var result = Items.Values.Where(x =>
+                x.Status.Equals(ProcessStatus.OutOfStock)
+                && requestMerchTypes.Contains(x.MerchType));
             return Task.FromResult(result);
         }
     }

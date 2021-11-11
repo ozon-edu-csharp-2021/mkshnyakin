@@ -6,6 +6,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
     {
         public void Notify(IMessageBusMessage message)
         {
+            message.Send();
         }
     }
 }

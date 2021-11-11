@@ -11,5 +11,9 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
         Task<IReadOnlyList<MerchPackItem>> FindByMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(
+            IEnumerable<long> skuIds,
+            CancellationToken cancellationToken = default);
     }
 }
