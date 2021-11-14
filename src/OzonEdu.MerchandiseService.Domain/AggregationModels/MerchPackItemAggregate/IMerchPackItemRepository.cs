@@ -8,12 +8,17 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
 {
     public interface IMerchPackItemRepository : IRepository<MerchPackItem>
     {
-        Task<IReadOnlyList<MerchPackItem>> FindByMerchTypeAsync(
+        Task<IReadOnlyCollection<MerchPackItem>> FindByMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(
+        Task<IReadOnlyCollection<RequestMerchType>> FindMerchTypesBySkuAsync(
             IEnumerable<long> skuIds,
+            CancellationToken cancellationToken = default);
+
+        Task AddToPackAsync(
+            RequestMerchType requestMerchType,
+            IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default);
     }
 }

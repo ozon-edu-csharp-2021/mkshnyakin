@@ -1,13 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
 using CSharpCourse.Core.Lib.Events;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
-using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
 {
@@ -30,47 +30,61 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             Ten = 10
         }
 
-        private readonly IMediator _mediator;
-        private readonly IOzonEduEmployeeServiceClient _employeeServiceClient;
+        private readonly ILogger<DevelopmentController> _logger;
 
-        public DevelopmentController(IMediator mediator, IOzonEduEmployeeServiceClient employeeServiceClient)
+        private readonly IMediator _mediator;
+
+        public DevelopmentController(IMediator mediator, ILogger<DevelopmentController> logger)
         {
             _mediator = mediator;
-            _employeeServiceClient = employeeServiceClient;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Симуляция автоматического (системного) запроса на выдачу мерча
+        ///     Симуляция автоматического (системного) запроса на выдачу мерча
         /// </summary>
         /// <param name="employeeIdEnum">Заглушка на 10 employeeId</param>
-        /// <param name="employeeEventType">Hiring=100, ProbationPeriodEnding=200, ConferenceAttendance=300,
-        /// MerchDelivery=400, Dismissal=1000</param>
-        /// <param name="merchType">WelcomePack=10, ConferenceListenerPack=20, ConferenceSpeakerPack=30, ProbationPeriodEndingPack=40, VeteranPack = 50</param>
+        /// <param name="employeeEventType">
+        ///     Hiring=100, ProbationPeriodEnding=200, ConferenceAttendance=300,
+        ///     MerchDelivery=400, Dismissal=1000
+        /// </param>
+        /// <param name="merchType">
+        ///     WelcomePack=10, ConferenceListenerPack=20, ConferenceSpeakerPack=30,
+        ///     ProbationPeriodEndingPack=40, VeteranPack = 50
+        /// </param>
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("send-system-merch-request/{employeeIdEnum}/{merchType}")]
-        public async Task<ActionResult> SendEmployeeEvent(
+        public async Task<ActionResult> SendSystemMerchRequest(
             EmployeeIdEnum employeeIdEnum,
             MerchType merchType,
             CancellationToken token)
         {
-            var employeeId = (long) employeeIdEnum;
-
-            var processUserMerchRequestCommand = new ProcessMerchRequestCommand
+            try
             {
-                EmployeeId = employeeId,
-                MerchType = merchType,
-                IsSystem = true,
-            };
+                var employeeId = (long) employeeIdEnum;
 
-            await _mediator.Send(processUserMerchRequestCommand, token);
+                var processMerchRequestCommand = new ProcessMerchRequestCommand
+                {
+                    EmployeeId = employeeId,
+                    MerchType = merchType,
+                    IsSystem = true
+                };
+
+                await _mediator.Send(processMerchRequestCommand, token);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not process system merch request");
+                return UnprocessableEntity();
+            }
 
             return Ok();
         }
 
         /// <summary>
-        /// Симуляция события поставки
+        ///     Симуляция события поставки
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
@@ -78,19 +92,27 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [Route("ship-supply")]
         public async Task<ActionResult> ShipSupply(CancellationToken token)
         {
-            var processUserMerchRequestCommand = new ProcessSupplyEventCommand()
+            try
             {
-                Items = new SupplyShippedItem[]
+                var processSupplyEventCommand = new ProcessSupplyEventCommand
                 {
-                    new() {SkuId = 2, Quantity = 10}, // ConferenceListenerPack, ConferenceSpeakerPack
-                    new() {SkuId = 4, Quantity = 10}, // ProbationPeriodEndingPack
-                    new() {SkuId = 5, Quantity = 10}, // ProbationPeriodEndingPack
-                    new() {SkuId = 6, Quantity = 10}, // VeteranPack
-                    new() {SkuId = 7, Quantity = 10}, // VeteranPack
-                    new() {SkuId = 8, Quantity = 10},
-                }
-            };
-            await _mediator.Send(processUserMerchRequestCommand, token);
+                    Items = new SupplyShippedItem[]
+                    {
+                        new() {SkuId = 2, Quantity = 10}, // ConferenceListenerPack, ConferenceSpeakerPack
+                        new() {SkuId = 4, Quantity = 10}, // ProbationPeriodEndingPack
+                        new() {SkuId = 5, Quantity = 10}, // ProbationPeriodEndingPack
+                        new() {SkuId = 6, Quantity = 10}, // VeteranPack
+                        new() {SkuId = 7, Quantity = 10}, // VeteranPack
+                        new() {SkuId = 8, Quantity = 10}
+                    }
+                };
+                await _mediator.Send(processSupplyEventCommand, token);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not process supply event");
+                return UnprocessableEntity();
+            }
 
             return Ok();
         }

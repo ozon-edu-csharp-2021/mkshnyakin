@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 
@@ -14,15 +14,15 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
     public class GetMerchRequestHistoryForEmployeeIdCommandCommandHandler
         : IRequestHandler<GetMerchRequestHistoryForEmployeeIdCommand, IEnumerable<MerchRequestHistoryItem>>
     {
-        private readonly IMerchPackItemRepository _merchPackItemRepository;
         private readonly IMerchRequestRepository _merchRequestRepository;
+        private readonly IApplicationService _applicationService;
 
         public GetMerchRequestHistoryForEmployeeIdCommandCommandHandler(
             IMerchRequestRepository merchRequestRepository,
-            IMerchPackItemRepository merchPackItemRepository)
+            IApplicationService applicationService)
         {
             _merchRequestRepository = merchRequestRepository;
-            _merchPackItemRepository = merchPackItemRepository;
+            _applicationService = applicationService;
         }
 
         public async Task<IEnumerable<MerchRequestHistoryItem>> Handle(
@@ -46,19 +46,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
 
             foreach (var merchRequest in history)
             {
-                IEnumerable<MerchPackItem> merchPackItems;
-                try
-                {
-                    merchPackItems = await _merchPackItemRepository.FindByMerchTypeAsync(
-                        merchRequest.MerchType,
-                        cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    throw new ItemNotFoundException(
-                        $"MerchPackItems are not found for MerchType: {merchRequest.MerchType}",
-                        e);
-                }
+                var merchPackItems =
+                    await _applicationService.GetMerchPackItemsByType(merchRequest.MerchType, cancellationToken);
 
                 var merchRequestHistoryItems = merchPackItems.Select(x => new MerchRequestHistoryItem
                 {

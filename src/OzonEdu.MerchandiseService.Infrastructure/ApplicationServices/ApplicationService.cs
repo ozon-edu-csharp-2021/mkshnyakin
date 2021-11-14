@@ -71,7 +71,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                     e);
             }
 
-            var employee = employeeViewModel?.ToEmployee();
+            if (employeeViewModel is null)
+            {
+                throw new ItemNotFoundException(
+                    $"Employee (id:{id}, email: {email}) not found in OzonEduEmployeeService");
+            }
+
+            var employee = employeeViewModel.ToEmployee();
             return employee;
         }
 
@@ -148,7 +154,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                     var employeeEmailMessage = new EmailMessage
                     {
                         ToEmail = employee.Email.Value,
-                        ToName =  employee.Name.ToString(),
+                        ToName = employee.Name.ToString(),
                         Subject = "Необходимо подойти к HR для получения мерча",
                         Body = string.Empty
                     };
@@ -159,7 +165,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                     var employeeEmailMessage = new EmailMessage
                     {
                         ToEmail = "hr@ozon.example.com",
-                        ToName =  "HR department",
+                        ToName = "HR department",
                         Subject = "Мерч закончился и необходимо сделать поставку",
                         Body = $"Список SkuId: {string.Join(", ", items)}"
                     };
