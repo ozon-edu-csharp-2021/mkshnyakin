@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using OzonEdu.MerchandiseService.GrpcServices;
+using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService
@@ -11,6 +12,7 @@ namespace OzonEdu.MerchandiseService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IMerchForEmployeesService, Services.MerchForEmployeesService>();
+            services.AddDomainInfrastructure();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

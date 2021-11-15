@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-
 namespace OzonEdu.MerchandiseService.HttpModels
 {
     public class EmployeeMerchPostResponse
     {
-        public IEnumerable<EmployeeMerchItem> Items { get; set; }
+        public long RequestId { get; init; }
+        public string Message { get; init; }
     }
 }
