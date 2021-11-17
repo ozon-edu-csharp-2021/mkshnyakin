@@ -30,7 +30,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             var notepad = Create(new MerchPackItem(ItemName.Create("Блокнот с логотипом Ozon"), Sku.Create(2)));
             var blueTshirt = Create(new MerchPackItem(ItemName.Create("Футболка синяя"), Sku.Create(3)));
             var ozonTshirt = Create(new MerchPackItem(ItemName.Create("Футболка с логотипом Ozon"), Sku.Create(4)));
-            var socks = Create(new MerchPackItem(ItemName.Create("Носки с логотипом Ozon "), Sku.Create(5)));
+            var socks = Create(new MerchPackItem(ItemName.Create("Носки с логотипом Ozon"), Sku.Create(5)));
             var backpack = Create(new MerchPackItem(ItemName.Create("Рюкзак для ноутбука"), Sku.Create(6)));
             var sweatshirt = Create(new MerchPackItem(ItemName.Create("Толстовка с логотипом Ozon"), Sku.Create(7)));
 
