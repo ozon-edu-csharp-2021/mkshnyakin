@@ -38,7 +38,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 MerchType = itemToCreate.MerchType.Id,
                 Status = itemToCreate.Status.Id,
                 Mode = itemToCreate.Mode.Id,
-                GiveOutDate = itemToCreate.GiveOutDate.Value
+                GiveOutDate = itemToCreate.GiveOutDate?.Value
             };
 
             var commandDefinition = new CommandDefinition(
@@ -111,7 +111,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 MerchType = itemToUpdate.MerchType.Id,
                 Status = itemToUpdate.Status.Id,
                 Mode = itemToUpdate.Mode.Id,
-                GiveOutDate = itemToUpdate.GiveOutDate.Value
+                GiveOutDate = itemToUpdate.GiveOutDate?.Value
             };
 
             var commandDefinition = new CommandDefinition(

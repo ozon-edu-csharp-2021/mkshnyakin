@@ -33,7 +33,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers
 
             /*
             var merchRequest = await _merchRequestRepository.GetByIdAsync(8, cancellationToken);
-            merchRequest.Complete(Date.Create("02/21/2021 21:21:21"));
+            //merchRequest.Complete(Date.Create("02/21/2021 21:21:21"));
             merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
             */
 
@@ -73,10 +73,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers
             items = await _merchPackItemRepository.FindMerchTypesBySkuAsync(new[] {6L, 3, 1}, cancellationToken);
             */
             
+            /*
             var item1 = await _merchPackItemRepository.GetByIdAsync(3, cancellationToken);
             var item2 = await _merchPackItemRepository.GetByIdAsync(4, cancellationToken);
             await _merchPackItemRepository.AddToPackAsync(RequestMerchType.VeteranPack, new[] {item1, item2}, cancellationToken);
-            
+            */
 
             return Unit.Value;
         }
