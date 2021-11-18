@@ -36,9 +36,9 @@ namespace OzonEdu.MerchandiseService.Domain.Contracts
         /// <summary>
         /// Удалить существующую сущность
         /// </summary>
-        /// <param name="itemToUpdate">Объект для удаления</param>
+        /// <param name="itemToDelete">Объект для удаления</param>
         /// <param name="cancellationToken">Токен для отмены операции. <see cref="CancellationToken"/></param>
         /// <returns>Обновленная сущность сущность</returns>
-        Task<TAggregationRoot> DeleteAsync(TAggregationRoot itemToUpdate, CancellationToken cancellationToken = default);
+        Task<TAggregationRoot> DeleteAsync(TAggregationRoot itemToDelete, CancellationToken cancellationToken = default);
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
-using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 {
@@ -72,10 +70,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
         }
 
         public Task<MerchPackItem> DeleteAsync(
-            MerchPackItem merchPackItem,
+            MerchPackItem itemToDelete,
             CancellationToken cancellationToken = default)
         {
-            if (MerchPackItems.TryRemove(merchPackItem.Id, out var deletedItem))
+            if (MerchPackItems.TryRemove(itemToDelete.Id, out var deletedItem))
             {
                 var relationIds = MerchTypeToItemsRelations
                     .Where(x => x.Value.MerchPackItemId == deletedItem.Id)

@@ -7,16 +7,20 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
     {
         public override void Up()
         {
-            Create.Table(TableNames.MerchTypeToItemsRelations)
-                .WithColumn("id").AsInt64().Identity().PrimaryKey()
-                .WithColumn("merch_type").AsInt32().NotNullable()
-                .WithColumn("merch_pack_item_id").AsInt64().NotNullable()
-                ;
+            Execute.Sql(@"
+                create table if not exists merch_type_to_items_relations (
+                    id                  bigserial   primary key,
+                    merch_type          integer     not null,
+                    merch_pack_item_id  bigint      not null,
+                    constraint merch_type_to_items_unique
+                        unique (merch_type, merch_pack_item_id)
+                );"
+            );
         }
 
         public override void Down()
         {
-            Delete.Table(TableNames.MerchTypeToItemsRelations);
+            Execute.Sql("drop table if exists merch_type_to_items_relations;");
         }
     }
 }

@@ -7,53 +7,19 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
     {
         public override void Up()
         {
-            Insert.IntoTable(TableNames.MerchTypeToItemsRelations)
-                .Row(new
-                {
-                    merch_type = 10,
-                    merch_pack_item_id = 3,
-                })
-                .Row(new
-                {
-                    merch_type = 20,
-                    merch_pack_item_id = 1,
-                })
-                .Row(new
-                {
-                    merch_type = 20,
-                    merch_pack_item_id = 2,
-                })
-                .Row(new
-                {
-                    merch_type = 30,
-                    merch_pack_item_id = 1,
-                })
-                .Row(new
-                {
-                    merch_type = 30,
-                    merch_pack_item_id = 2,
-                })
-                .Row(new
-                {
-                    merch_type = 40,
-                    merch_pack_item_id = 4,
-                })
-                .Row(new
-                {
-                    merch_type = 40,
-                    merch_pack_item_id = 5,
-                })
-                .Row(new
-                {
-                    merch_type = 50,
-                    merch_pack_item_id = 6,
-                })
-                .Row(new
-                {
-                    merch_type = 50,
-                    merch_pack_item_id = 7,
-                })
-                ;
+            Execute.Sql(@"
+                insert into merch_type_to_items_relations (merch_type, merch_pack_item_id)
+                values  (10, 3),
+                        (20, 1),
+                        (20, 2),
+                        (30, 1),
+                        (30, 2),
+                        (40, 4),
+                        (40, 5),
+                        (50, 6),
+                        (50, 7)
+                on conflict do nothing;"
+            );
         }
     }
 }

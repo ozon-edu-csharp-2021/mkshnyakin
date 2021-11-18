@@ -7,43 +7,17 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
     {
         public override void Up()
         {
-            Insert.IntoTable(TableNames.MerchPackItems)
-                .Row(new
-                {
-                    name = "Ручка с логотипом Ozon",
-                    sku = 1,
-                })
-                .Row(new
-                {
-                    name = "Блокнот с логотипом Ozon",
-                    sku = 2,
-                })
-                .Row(new
-                {
-                    name = "Футболка синяя",
-                    sku = 3,
-                })
-                .Row(new
-                {
-                    name = "Футболка с логотипом Ozon",
-                    sku = 4,
-                })
-                .Row(new
-                {
-                    name = "Носки с логотипом Ozon",
-                    sku = 5,
-                })
-                .Row(new
-                {
-                    name = "Рюкзак для ноутбука",
-                    sku = 6,
-                })
-                .Row(new
-                {
-                    name = "Толстовка с логотипом Ozon",
-                    sku = 7,
-                })
-                ;
+            Execute.Sql(@"
+                insert into merch_pack_items (name, sku)
+                values  ('Ручка с логотипом Ozon', 1),
+                        ('Блокнот с логотипом Ozon', 2),
+                        ('Футболка синяя', 3),
+                        ('Футболка с логотипом Ozon', 4),
+                        ('Носки с логотипом Ozon', 5),
+                        ('Рюкзак для ноутбука', 6),
+                        ('Толстовка с логотипом Ozon', 7)
+                on conflict do nothing;"
+            );
         }
     }
 }

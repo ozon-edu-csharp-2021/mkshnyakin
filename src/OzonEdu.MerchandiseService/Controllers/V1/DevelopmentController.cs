@@ -6,6 +6,7 @@ using CSharpCourse.Core.Lib.Events;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OzonEdu.MerchandiseService.Infrastructure.Commands;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 
@@ -113,6 +114,21 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                 _logger.LogError(e, "Could not process supply event");
                 return UnprocessableEntity();
             }
+
+            return Ok();
+        }
+        
+        /// <summary>
+        ///     Тестирование реализации репозиториев
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("test-repositories")]
+        public async Task<ActionResult> TestRepositories(CancellationToken token)
+        {
+            var testCommand = new TestCommand();
+            await _mediator.Send(testCommand, token);
 
             return Ok();
         }

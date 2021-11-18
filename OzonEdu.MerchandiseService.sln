@@ -9,6 +9,7 @@ ProjectSection(SolutionItems) = preProject
 	.dockerignore = .dockerignore
 	bounded-context-canvas.drawio = bounded-context-canvas.drawio
 	entrypoint.sh = entrypoint.sh
+	wait-for-it.sh = wait-for-it.sh
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34C94014-E3FD-40EC-B6C0-8CCC003109FA}"
@@ -22,7 +23,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{200F839E-61E4-4D93-A70C-B0FD76EC310D}"
 ProjectSection(SolutionItems) = preProject
 	docker-compose.yml = docker-compose.yml
-	docker-compose.backup.yml = docker-compose.backup.yml
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.HttpModels", "src\OzonEdu.MerchandiseService.HttpModels\OzonEdu.MerchandiseService.HttpModels.csproj", "{21808060-E9BA-482F-B765-BBD7466F922B}"

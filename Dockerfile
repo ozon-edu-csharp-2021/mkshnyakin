@@ -29,6 +29,7 @@ COPY src/OzonEdu.MerchandiseService/. .
 FROM build6 AS publish
 RUN dotnet publish -c Release -o /app
 COPY entrypoint.sh /app/.
+COPY wait-for-it.sh /app/.
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 EXPOSE 5000
@@ -39,4 +40,6 @@ FROM runtime AS final
 WORKDIR /app
 COPY --from=publish /app .
 RUN chmod +x entrypoint.sh
+RUN chmod +x wait-for-it.sh
 CMD /bin/bash entrypoint.sh
+#CMD ["wait-for-it.sh", "db:5432", "--", "entrypoint.sh"]

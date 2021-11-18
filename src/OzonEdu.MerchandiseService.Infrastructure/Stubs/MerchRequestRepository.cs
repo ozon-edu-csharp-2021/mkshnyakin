@@ -75,7 +75,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     Create(merchRequest);
                 }
                 {
-                    var merchRequest = new MerchRequest(employee5, RequestMerchType.ConferenceListenerPack, CreationMode.System);
+                    var merchRequest = new MerchRequest(employee5, RequestMerchType.ConferenceListenerPack,
+                        CreationMode.System);
                     merchRequest.SetStatus(ProcessStatus.OutOfStock);
                     Create(merchRequest);
                 }
@@ -117,45 +118,55 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(Items[itemToUpdate.Id]);
         }
 
-        public Task<MerchRequest> DeleteAsync(MerchRequest itemToUpdate, CancellationToken cancellationToken = default)
+        public Task<MerchRequest> DeleteAsync(MerchRequest itemToDelete, CancellationToken cancellationToken = default)
         {
-            Items.TryRemove(itemToUpdate.Id, out var merchRequest);
+            Items.TryRemove(itemToDelete.Id, out var merchRequest);
             return Task.FromResult(merchRequest);
         }
 
-        public Task<IEnumerable<MerchRequest>> FindByEmployeeIdAsync(
+        public Task<IReadOnlyCollection<MerchRequest>> FindByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId);
+            var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId)
+                .ToList()
+                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;;
             return Task.FromResult(result);
         }
 
-        public Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
+        public Task<IReadOnlyCollection<MerchRequest>> FindByRequestMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values.Where(x => x.MerchType.Equals(requestMerchType));
+            var result = Items.Values
+                .Where(x => x.MerchType.Equals(requestMerchType))
+                .ToList()
+                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
+            
             return Task.FromResult(result);
         }
 
-        public Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
+        public Task<IReadOnlyCollection<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
             var result = Items.Values.Where(x =>
                 x.EmployeeId.Value.Equals(employeeId)
-                && x.Status.Equals(ProcessStatus.Complete));
+                && x.Status.Equals(ProcessStatus.Complete))
+                .ToList()
+                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
             return Task.FromResult(result);
         }
 
-        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+        public Task<IReadOnlyCollection<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
             var result = Items.Values.Where(x =>
                 x.Status.Equals(ProcessStatus.OutOfStock)
-                && requestMerchTypes.Contains(x.MerchType));
+                && requestMerchTypes.Contains(x.MerchType))
+                .ToList()
+                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
             return Task.FromResult(result);
         }
     }

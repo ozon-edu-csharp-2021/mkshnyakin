@@ -7,19 +7,21 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
     {
         public override void Up()
         {
-            Create.Table(TableNames.MerchRequests)
-                .WithColumn("id").AsInt64().Identity().PrimaryKey()
-                .WithColumn("employee_id").AsInt64().NotNullable()
-                .WithColumn("merch_type").AsInt32().NotNullable()
-                .WithColumn("status").AsInt32().NotNullable()
-                .WithColumn("mode").AsInt32().NotNullable()
-                .WithColumn("give_out_date").AsDateTime().Nullable()
-                ;
+            Execute.Sql(@"
+                create table if not exists merch_requests (
+                    id            bigserial primary key,
+                    employee_id   bigint    not null,
+                    merch_type    integer   not null,
+                    status        integer   not null,
+                    mode          integer   not null,
+                    give_out_date timestamp
+                );"
+            );
         }
 
         public override void Down()
         {
-            Delete.Table(TableNames.MerchRequests);
+            Execute.Sql("drop table if exists merch_requests;");
         }
     }
 }

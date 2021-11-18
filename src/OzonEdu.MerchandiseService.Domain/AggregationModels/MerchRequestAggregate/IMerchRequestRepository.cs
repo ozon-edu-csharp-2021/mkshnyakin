@@ -7,19 +7,19 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
 {
     public interface IMerchRequestRepository : IRepository<MerchRequest>
     {
-        Task<IEnumerable<MerchRequest>> FindByEmployeeIdAsync(
+        Task<IReadOnlyCollection<MerchRequest>> FindByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
+        Task<IReadOnlyCollection<MerchRequest>> FindByRequestMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
+        Task<IReadOnlyCollection<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default);
 
-        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+        Task<IReadOnlyCollection<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default);
     }

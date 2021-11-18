@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ namespace OzonEdu.MerchandiseService.Migrator
                 .Build();
 
             var connectionString = configuration.GetSection("DatabaseConnectionOptions:ConnectionString").Get<string>();
+            Console.WriteLine(connectionString);
             var services = new ServiceCollection()
                 .AddFluentMigratorCore()
                 .ConfigureRunner(
@@ -41,7 +43,7 @@ namespace OzonEdu.MerchandiseService.Migrator
                 {
                     runner.MigrateUp();
                 }
-
+            
                 using var connection = new NpgsqlConnection(connectionString);
                 connection.Open();
                 connection.ReloadTypes();

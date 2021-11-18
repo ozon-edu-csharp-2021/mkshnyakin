@@ -7,16 +7,18 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
     {
         public override void Up()
         {
-            Create.Table(TableNames.MerchPackItems)
-                .WithColumn("id").AsInt64().Identity().PrimaryKey()
-                .WithColumn("name").AsString().NotNullable()
-                .WithColumn("sku").AsInt64().NotNullable()
-                ;
+            Execute.Sql(@"
+                create table if not exists merch_pack_items (
+                    id      bigserial   primary key,
+                    name    text        not null,
+                    sku     bigint      not null                                
+                );"
+            );
         }
 
         public override void Down()
         {
-            Delete.Table(TableNames.MerchPackItems);
+            Execute.Sql("drop table if exists merch_pack_items;");
         }
     }
 }
