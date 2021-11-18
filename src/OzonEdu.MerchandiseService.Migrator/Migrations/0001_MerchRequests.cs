@@ -15,7 +15,14 @@ namespace OzonEdu.MerchandiseService.Migrator.Migrations
                     status        integer   not null,
                     mode          integer   not null,
                     give_out_date timestamp
-                );"
+                );
+
+                create index merch_requests_merch_type_status_idx
+                    on merch_requests (merch_type, status);
+
+                create index merch_requests_employee_id_status_idx
+                    on merch_requests (employee_id, status);
+                "
             );
         }
 
