@@ -47,7 +47,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
-            var identity = connection.QuerySingleOrDefault<long>(commandDefinition);
+            var identity = await connection.QuerySingleOrDefaultAsync<long>(commandDefinition);
             if (identity != default)
             {
                 itemToCreate.SetId(identity);
