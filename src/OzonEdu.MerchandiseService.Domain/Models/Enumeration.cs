@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using OzonEdu.MerchandiseService.Domain.Exceptions;
 
 namespace OzonEdu.MerchandiseService.Domain.Models
 {
@@ -35,7 +36,10 @@ namespace OzonEdu.MerchandiseService.Domain.Models
             return typeMatches && valueMatches;
         }
 
-        public int CompareTo(object other) => Id.CompareTo(((Enumeration)other).Id);
+        public int CompareTo(object other) => Id.CompareTo(((Enumeration) other).Id);
 
+        public static T GetById<T>(int id) where T : Enumeration =>
+            GetAll<T>().FirstOrDefault(x => x.Id == id)
+            ?? throw new CorruptedValueObjectException($"{nameof(T)} not found for id={id}");
     }
 }

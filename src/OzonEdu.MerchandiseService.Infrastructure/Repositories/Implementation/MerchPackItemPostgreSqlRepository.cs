@@ -6,6 +6,7 @@ using Dapper;
 using Npgsql;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Models;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure.Interfaces;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
@@ -212,13 +213,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
             var requestMerchTypeIds = await connection.QueryAsync<int>(commandDefinition);
-            var requestMerchTypes = requestMerchTypeIds.Select(RequestMerchType.Create)
+            var requestMerchTypes = requestMerchTypeIds.Select(Enumeration.GetById<RequestMerchType>)
                 .ToList()
                 .AsReadOnly() as IReadOnlyCollection<RequestMerchType>;
             return requestMerchTypes;
         }
 
-        public async Task AddToPackAsync(
+        public async Task<int> AddToPackAsync(
             RequestMerchType requestMerchType,
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default)
@@ -243,7 +244,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 cancellationToken: cancellationToken);
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
-            await connection.ExecuteAsync(commandDefinition);
+            var affectedRows = await connection.ExecuteAsync(commandDefinition);
+            return affectedRows;
         }
 
         private static async Task<IReadOnlyCollection<MerchPackItem>> QueryMerchPackItemsAsync(

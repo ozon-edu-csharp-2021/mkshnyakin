@@ -16,7 +16,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggre
             IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default);
 
-        Task AddToPackAsync(
+        Task<int> AddToPackAsync(
             RequestMerchType requestMerchType,
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default);

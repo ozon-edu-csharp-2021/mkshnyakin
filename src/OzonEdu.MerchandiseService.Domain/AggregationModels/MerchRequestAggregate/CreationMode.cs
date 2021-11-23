@@ -11,15 +11,5 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
         public CreationMode(int id, string name) : base(id, name)
         {
         }
-        
-        public static CreationMode Create(int id)
-        {
-            return id switch
-            {
-                1 => System,
-                2 => User,
-                _ => throw new CorruptedValueObjectException($"{nameof(id)} is invalid. Id: {id}")
-            };
-        }
     }
 }

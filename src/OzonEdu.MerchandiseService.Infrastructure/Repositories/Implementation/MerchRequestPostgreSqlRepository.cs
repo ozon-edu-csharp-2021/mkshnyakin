@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Models;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure.Interfaces;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
@@ -309,9 +310,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             var merchRequest = new MerchRequest(
                 merchRequestModel.Id,
                 EmployeeId.Create(merchRequestModel.EmployeeId),
-                RequestMerchType.Create(merchRequestModel.MerchType),
-                ProcessStatus.Create(merchRequestModel.Status),
-                CreationMode.Create(merchRequestModel.Mode),
+                Enumeration.GetById<RequestMerchType>(merchRequestModel.MerchType),
+                Enumeration.GetById<ProcessStatus>(merchRequestModel.Status),
+                Enumeration.GetById<CreationMode>(merchRequestModel.Mode),
                 merchRequestModel.GiveOutDate.HasValue ? Date.Create(merchRequestModel.GiveOutDate.Value) : null
             );
             return merchRequest;

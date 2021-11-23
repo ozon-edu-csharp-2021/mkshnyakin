@@ -76,7 +76,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers
             /*
             var item1 = await _merchPackItemRepository.GetByIdAsync(3, cancellationToken);
             var item2 = await _merchPackItemRepository.GetByIdAsync(4, cancellationToken);
-            await _merchPackItemRepository.AddToPackAsync(RequestMerchType.VeteranPack, new[] {item1, item2}, cancellationToken);
+            var affectedRows = await _merchPackItemRepository.AddToPackAsync(RequestMerchType.VeteranPack, new[] {item1, item2}, cancellationToken);
             */
 
             return Unit.Value;

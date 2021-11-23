@@ -143,11 +143,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(result);
         }
 
-        public Task AddToPackAsync(
+        public Task<int> AddToPackAsync(
             RequestMerchType requestMerchType,
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default)
         {
+            var affectedRows = 0;
             foreach (var merchPackItem in merchPackItems)
             {
                 var newRelation = new MerchTypeToItemsRelation
@@ -155,10 +156,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     RequestMerchType = requestMerchType,
                     MerchPackItemId = merchPackItem.Id
                 };
-                MerchTypeToItemsRelations.TryAdd(RelationsIdGen.Get(), newRelation);
+                if (MerchTypeToItemsRelations.TryAdd(RelationsIdGen.Get(), newRelation))
+                {
+                    affectedRows++;
+                }
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(affectedRows);
         }
 
 

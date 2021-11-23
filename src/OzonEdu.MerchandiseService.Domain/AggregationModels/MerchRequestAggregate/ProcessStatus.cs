@@ -12,16 +12,5 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
         public ProcessStatus(int id, string name) : base(id, name)
         {
         }
-
-        public static ProcessStatus Create(int id)
-        {
-            return id switch
-            {
-                1 => Draft,
-                2 => OutOfStock,
-                3 => Complete,
-                _ => throw new CorruptedValueObjectException($"{nameof(id)} is invalid. Id: {id}")
-            };
-        }
     }
 }

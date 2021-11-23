@@ -14,18 +14,5 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
         public RequestMerchType(int id, string name) : base(id, name)
         {
         }
-        
-        public static RequestMerchType Create(int id)
-        {
-            return id switch
-            {
-                10 => WelcomePack,
-                20 => ConferenceListenerPack,
-                30 => ConferenceSpeakerPack,
-                40 => ProbationPeriodEndingPack,
-                50 => VeteranPack,
-                _ => throw new CorruptedValueObjectException($"{nameof(id)} is invalid. Id: {id}")
-            };
-        }
     }
 }
