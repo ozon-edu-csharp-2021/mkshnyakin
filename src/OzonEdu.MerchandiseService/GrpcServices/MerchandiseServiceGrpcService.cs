@@ -2,44 +2,62 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSharpCourse.Core.Lib.Enums;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using MediatR;
 using OzonEdu.MerchandiseService.Grpc;
-using OzonEdu.MerchandiseService.Models;
+using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.GrpcServices
 {
     public class MerchandiseServiceGrpcService : MerchandiseServiceGrpc.MerchandiseServiceGrpcBase
     {
-        private readonly IMerchForEmployeesService _merchForEmployeesService;
+        private readonly IMediator _mediator;
 
-        public MerchandiseServiceGrpcService(IMerchForEmployeesService merchForEmployeesService)
+        public MerchandiseServiceGrpcService(IMerchForEmployeesService merchForEmployeesService, IMediator mediator)
         {
-            _merchForEmployeesService = merchForEmployeesService;
+            _mediator = mediator;
         }
 
         public override async Task<GetHistoryForEmployeeResponse> GetHistoryForEmployee(
-            EmployeeMerchRequest request,
+            EmployeeMerchHistoryRequest request,
             ServerCallContext context)
         {
-            IEnumerable<MerchHistoryItem> history = null;
+            IEnumerable<MerchRequestHistoryItem> history = null;
+            var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
+            {
+                EmployeeId = request.EmployeeId
+            };
             try
             {
-                history = await _merchForEmployeesService.GetHistoryForEmployee(
-                    request.EmployeeId,
-                    context.CancellationToken);
+                history = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, context.CancellationToken);
+            }
+            catch (ItemNotFoundException e)
+            {
+                var status = new Status(StatusCode.NotFound, e.Message);
+                var metadata = new Metadata
+                {
+                    {nameof(request.EmployeeId), request.EmployeeId.ToString()}
+                };
+                throw new RpcException(status, metadata);
             }
             catch (Exception e)
             {
                 throw CreateInternalRpcException(e);
             }
 
-            var items = history ?? Enumerable.Empty<MerchHistoryItem>();
+            var items = history ?? Enumerable.Empty<MerchRequestHistoryItem>();
             var convertedItems = items.Select(x => new EmployeeMerchGetResponseItem
             {
-                Item = new EmployeeMerchItem {Name = x.Item.Name, SkuId = x.Item.SkuId},
-                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.Date, DateTimeKind.Utc))
+                Item = new EmployeeMerchItem
+                {
+                    Name = x.Item.ItemName.Value,
+                    SkuId = x.Item.Sku.Id
+                },
+                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.GiveOutDate.Value, DateTimeKind.Utc))
             });
 
             var result = new GetHistoryForEmployeeResponse
@@ -54,40 +72,38 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             EmployeeMerchRequest request,
             ServerCallContext context)
         {
-            var employeeId = request.EmployeeId;
-            IEnumerable<MerchItem> items = null;
+            var processUserMerchRequestCommand = new ProcessMerchRequestCommand
+            {
+                EmployeeId = request.EmployeeId,
+                MerchType = (MerchType) request.MerchType,
+                IsSystem = false
+            };
+
             try
             {
-                items = await _merchForEmployeesService.RequestMerchForEmployee(employeeId, context.CancellationToken);
+                var result = await _mediator.Send(processUserMerchRequestCommand, context.CancellationToken);
+                var response = new RequestMerchForEmployeeResponse
+                {
+                    IsSuccess = result.IsSuccess,
+                    RequestId = result.RequestId,
+                    Message = result.Message
+                };
+                return response;
+            }
+            catch (ItemNotFoundException e)
+            {
+                var status = new Status(StatusCode.NotFound, e.Message);
+                var metadata = new Metadata
+                {
+                    {nameof(request.EmployeeId), request.EmployeeId.ToString()},
+                    {nameof(request.MerchType), request.MerchType.ToString()}
+                };
+                throw new RpcException(status, metadata);
             }
             catch (Exception e)
             {
                 throw CreateInternalRpcException(e);
             }
-
-            if (items is null)
-            {
-                var status = new Status(StatusCode.AlreadyExists, "Merch already given"); 
-                var metadata = new Metadata
-                {
-                    {"employeeId", employeeId.ToString()},
-                };
-                throw new RpcException(status, metadata);
-            }
-
-            var response = new RequestMerchForEmployeeResponse
-            {
-                Items =
-                {
-                    items.Select(x => new EmployeeMerchItem
-                    {
-                        Name = x.Name,
-                        SkuId = x.SkuId
-                    })
-                }
-            };
-
-            return response;
         }
 
         private static RpcException CreateInternalRpcException(Exception e)
@@ -95,7 +111,7 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             var status = new Status(StatusCode.Internal, e.Message);
             var metadata = new Metadata
             {
-                {"ExceptionType", e.GetType().FullName},
+                {"ExceptionType", e.GetType().FullName}
                 //{"StackTrace", e.StackTrace}, // BUG: Если раскомментировать, то будет StatusCode.Unknown с пустыми Trailers
             };
             var rpcException = new RpcException(status, metadata);

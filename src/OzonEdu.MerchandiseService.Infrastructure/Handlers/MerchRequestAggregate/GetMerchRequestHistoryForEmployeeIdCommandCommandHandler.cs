@@ -40,7 +40,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             catch (Exception e)
             {
                 throw new ItemNotFoundException(
-                    $"MerchRequestHistoryItems are not found for employeeId: {employeeId}",
+                    $"MerchRequestHistoryItems are not found for employeeId({employeeId}) because service crashed",
                     e);
             }
 

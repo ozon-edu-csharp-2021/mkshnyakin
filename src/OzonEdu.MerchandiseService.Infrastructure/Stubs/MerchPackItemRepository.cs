@@ -104,7 +104,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 }
             }
 
-            var result = merchPackItems.AsReadOnly() as IReadOnlyCollection<MerchPackItem>;
+            IReadOnlyCollection<MerchPackItem> result = merchPackItems.ToArray();
             return Task.FromResult(result);
         }
 
@@ -135,11 +135,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     }
                 }
             }
-
-            var result = merchTypes.Keys
-                    .ToList()
-                    .AsReadOnly()
-                as IReadOnlyCollection<RequestMerchType>;
+            
+            IReadOnlyCollection<RequestMerchType> result = merchTypes.Keys.ToArray();
             return Task.FromResult(result);
         }
 

@@ -128,9 +128,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId)
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;;
+            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x => x.EmployeeId.Value == employeeId)
+                .ToArray();
             return Task.FromResult(result);
         }
 
@@ -138,11 +137,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values
+            IReadOnlyCollection<MerchRequest> result = Items.Values
                 .Where(x => x.MerchType.Equals(requestMerchType))
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
-            
+                .ToArray();
             return Task.FromResult(result);
         }
 
@@ -150,11 +147,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values.Where(x =>
-                x.EmployeeId.Value.Equals(employeeId)
-                && x.Status.Equals(ProcessStatus.Complete))
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
+            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x =>
+                    x.EmployeeId.Value.Equals(employeeId)
+                    && x.Status.Equals(ProcessStatus.Complete))
+                .ToArray();
             return Task.FromResult(result);
         }
 
@@ -162,11 +158,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
-            var result = Items.Values.Where(x =>
-                x.Status.Equals(ProcessStatus.OutOfStock)
-                && requestMerchTypes.Contains(x.MerchType))
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
+            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x =>
+                    x.Status.Equals(ProcessStatus.OutOfStock)
+                    && requestMerchTypes.Contains(x.MerchType))
+                .ToArray();
             return Task.FromResult(result);
         }
     }

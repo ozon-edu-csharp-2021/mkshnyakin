@@ -298,10 +298,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             CommandDefinition commandDefinition)
         {
             var merchRequestModels = await connection.QueryAsync<Models.MerchRequest>(commandDefinition);
-            var merchRequestItems = merchRequestModels.Select(CreateMerchRequestByModel)
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchRequest>;
-
+            var merchRequestItems = merchRequestModels.Select(CreateMerchRequestByModel).ToArray();
             return merchRequestItems;
         }
 

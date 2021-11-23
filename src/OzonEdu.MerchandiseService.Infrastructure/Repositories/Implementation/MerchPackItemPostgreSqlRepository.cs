@@ -213,9 +213,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
             var requestMerchTypeIds = await connection.QueryAsync<int>(commandDefinition);
-            var requestMerchTypes = requestMerchTypeIds.Select(Enumeration.GetById<RequestMerchType>)
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<RequestMerchType>;
+            var requestMerchTypes = requestMerchTypeIds.Select(Enumeration.GetById<RequestMerchType>).ToArray();
             return requestMerchTypes;
         }
 
@@ -253,10 +251,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             CommandDefinition commandDefinition)
         {
             var merchPackItemModels = await connection.QueryAsync<Models.MerchPackItem>(commandDefinition);
-            var merchPackItems = merchPackItemModels.Select(CreateMerchPackItemByModel)
-                .ToList()
-                .AsReadOnly() as IReadOnlyCollection<MerchPackItem>;
-
+            var merchPackItems = merchPackItemModels.Select(CreateMerchPackItemByModel).ToArray();
             return merchPackItems;
         }
 
