@@ -11,14 +11,16 @@ services:
       - "5001:5001"
     environment:
       DatabaseConnectionOptions__ConnectionString: "Host=host.docker.internal;Port=5424;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
+      OzonEduStockApiGrpcOptions__Address: "http://host.docker.internal:5082"
     depends_on:
       - merchandise-service-db
-    command: ["./wait-for-it.sh", "merchandise-service-db:5424", "--", "./entrypoint.sh"]
+    command: ["./wait-for-it.sh", "merchandise-service-db:5432", "--", "./entrypoint.sh"]
 
   merchandise-service-db:
     image: postgres:latest
     ports:
       - "5424:5432"
+    hostname: merchandise-service-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: merchandiseServicePassword
@@ -42,6 +44,8 @@ services:
   employees-service:
     image: ghcr.io/ozon-edu-csharp-2021/employees-service:main
     hostname: employees-service
+    ports:
+      - "5080:80"
     depends_on:
       - employees-service-db
     volumes:
@@ -52,6 +56,8 @@ services:
     hostname: stock-api
     environment:
       DatabaseConnectionOptions__ConnectionString: "Host=host.docker.internal;Port=5427;Database=stock-api;Username=postgres;Password=stockApiPassword"
+    ports:
+      - "5082:82"
     depends_on:
       - stock-api-db
 

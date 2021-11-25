@@ -141,13 +141,16 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                 throw new ItemNotFoundException("MerchPackItems not available because service crashed", e);
             }
 
-            try
+            if (isItemsAvailable)
             {
-                isItemsReserved = await _ozonEduStockApiClient.Reserve(items, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                throw new ItemNotFoundException("MerchPackItems not reserved because service crashed", e);
+                try
+                {
+                    isItemsReserved = await _ozonEduStockApiClient.Reserve(items, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    throw new ItemNotFoundException("MerchPackItems not reserved because service crashed", e);
+                }
             }
 
             var isAllOk = isItemsAvailable && isItemsReserved;
