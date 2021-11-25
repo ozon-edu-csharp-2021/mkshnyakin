@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
@@ -39,19 +41,22 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IOzonEduStockApiClient _ozonEduStockApiClient;
         private readonly IMessageBus _messageBus;
+        private readonly EmailOptions _emailOptions;
 
         public ApplicationService(
             IOzonEduEmployeeServiceClient employeeClient,
             IMerchPackItemRepository merchPackItemRepository,
             IMerchRequestRepository merchRequestRepository,
             IOzonEduStockApiClient ozonEduStockApiClient,
-            IMessageBus messageBus)
+            IMessageBus messageBus,
+            IOptions<EmailOptions> emailOptions)
         {
             _employeeClient = employeeClient;
             _merchPackItemRepository = merchPackItemRepository;
             _merchRequestRepository = merchRequestRepository;
             _ozonEduStockApiClient = ozonEduStockApiClient;
             _messageBus = messageBus;
+            _emailOptions = emailOptions.Value;
         }
 
         public async Task<Employee> GetEmployee(long id, string email, CancellationToken cancellationToken = default)
@@ -155,7 +160,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                     {
                         ToEmail = employee.Email.Value,
                         ToName = employee.Name.ToString(),
-                        Subject = "Необходимо подойти к HR для получения мерча",
+                        Subject = _emailOptions.EmployeeSystemSubject,
                         Body = string.Empty
                     };
                     _messageBus.Notify(employeeEmailMessage);
@@ -164,10 +169,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                 {
                     var employeeEmailMessage = new EmailMessage
                     {
-                        ToEmail = "hr@ozon.example.com",
-                        ToName = "HR department",
-                        Subject = "Мерч закончился и необходимо сделать поставку",
-                        Body = $"Список SkuId: {string.Join(", ", items)}"
+                        ToEmail = _emailOptions.HrToEmail,
+                        ToName = _emailOptions.HrToName,
+                        Subject = _emailOptions.HrSubject,
+                        Body = $"SkuIds: {string.Join(", ", items)}"
                     };
                     _messageBus.Notify(employeeEmailMessage);
                 }

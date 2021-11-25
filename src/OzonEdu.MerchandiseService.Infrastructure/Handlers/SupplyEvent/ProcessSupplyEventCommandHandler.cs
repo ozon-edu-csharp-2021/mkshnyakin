@@ -3,10 +3,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
+using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
@@ -17,17 +19,20 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IApplicationService _applicationService;
         private readonly IMessageBus _messageBus;
+        private readonly EmailOptions _emailOptions;
 
         public ProcessSupplyEventCommandHandler(
             IMerchPackItemRepository merchPackItemRepository,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
-            IMessageBus messageBus)
+            IMessageBus messageBus,
+            IOptions<EmailOptions> emailOptions)
         {
             _merchPackItemRepository = merchPackItemRepository;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
             _messageBus = messageBus;
+            _emailOptions = emailOptions.Value;
         }
 
         public async Task<Unit> Handle(ProcessSupplyEventCommand command, CancellationToken cancellationToken)
@@ -52,7 +57,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
                     {
                         ToEmail = employee.Email.Value,
                         ToName = employee.Name.ToString(),
-                        Subject = "Мерч появился на остатках",
+                        Subject = _emailOptions.EmployeeUserSubject,
                         Body = string.Empty
                     };
                     _messageBus.Notify(employeeEmailMessage);

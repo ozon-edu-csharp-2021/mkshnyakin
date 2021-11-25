@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.GrpcServices;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
@@ -22,6 +23,7 @@ namespace OzonEdu.MerchandiseService
         {
             services.Configure<DatabaseConnectionOptions>(Configuration.GetSection(nameof(DatabaseConnectionOptions)));
             services.Configure<OzonEduStockApiGrpcOptions>(Configuration.GetSection(nameof(OzonEduStockApiGrpcOptions)));
+            services.Configure<EmailOptions>(Configuration.GetSection(nameof(EmailOptions)));
             services.AddDomainInfrastructure();
         }
 
