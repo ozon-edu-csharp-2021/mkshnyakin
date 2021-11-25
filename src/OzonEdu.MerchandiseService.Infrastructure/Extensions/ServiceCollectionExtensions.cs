@@ -5,6 +5,7 @@ using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
+using OzonEdu.MerchandiseService.Infrastructure.Cache;
 using OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
@@ -25,6 +26,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             services.AddRepositories();
             services.AddExternalServices();
             services.AddApplicationServices();
+            services.AddCache();
             return services;
         }
 
@@ -55,6 +57,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
         private static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IApplicationService, ApplicationService>();
+            return services;
+        }
+        
+        private static IServiceCollection AddCache(this IServiceCollection services)
+        {
+            services.AddLazyCache();
+            services.AddSingleton<CacheKeysProvider>();
             return services;
         }
     }
