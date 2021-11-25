@@ -29,18 +29,18 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure
             _changeTracker = changeTracker;
         }
 
-        public async ValueTask StartTransaction(CancellationToken token)
+        public async ValueTask StartTransactionAsync(CancellationToken cancellationToken = default)
         {
             if (_npgsqlTransaction is not null)
             {
                 return;
             }
 
-            var connection = await _dbConnectionFactory.CreateConnection(token);
-            _npgsqlTransaction = await connection.BeginTransactionAsync(token);
+            var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
+            _npgsqlTransaction = await connection.BeginTransactionAsync(cancellationToken);
         }
 
-        public async Task SaveChangesAsync(CancellationToken cancellationToken)
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             if (_npgsqlTransaction is null)
             {
@@ -51,7 +51,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure
                 _changeTracker.TrackedEntities
                     .SelectMany(x =>
                     {
-                        var events = x.DomainEvents.ToList();
+                        var domainEvents = x.DomainEvents ?? Enumerable.Empty<INotification>(); 
+                        var events = domainEvents.ToList();
                         x.ClearDomainEvents();
                         return events;
                     }));
@@ -62,6 +63,18 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure
             }
 
             await _npgsqlTransaction.CommitAsync(cancellationToken);
+            await _npgsqlTransaction.DisposeAsync();
+        }
+
+        public async Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            if (_npgsqlTransaction is null)
+            {
+                throw new NoActiveTransactionStartedException();
+            }
+
+            await _npgsqlTransaction.RollbackAsync(cancellationToken);
+            await _npgsqlTransaction.DisposeAsync();
         }
 
         void IDisposable.Dispose()

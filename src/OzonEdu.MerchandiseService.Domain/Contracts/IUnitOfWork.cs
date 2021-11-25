@@ -6,8 +6,8 @@ namespace OzonEdu.MerchandiseService.Domain.Contracts
 {
     public interface IUnitOfWork : IDisposable
     {
-        ValueTask StartTransaction(CancellationToken token);
-        
-        Task SaveChangesAsync(CancellationToken cancellationToken);
+        ValueTask StartTransactionAsync(CancellationToken cancellationToken = default);
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task RollbackAsync(CancellationToken cancellationToken = default);
     }
 }

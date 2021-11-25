@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
@@ -15,6 +16,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
 {
     public class ProcessSupplyEventCommandHandler : IRequestHandler<ProcessSupplyEventCommand>
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMerchPackItemRepository _merchPackItemRepository;
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IApplicationService _applicationService;
@@ -22,12 +24,14 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
         private readonly EmailOptions _emailOptions;
 
         public ProcessSupplyEventCommandHandler(
+            IUnitOfWork unitOfWork,
             IMerchPackItemRepository merchPackItemRepository,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
             IMessageBus messageBus,
             IOptions<EmailOptions> emailOptions)
         {
+            _unitOfWork = unitOfWork;
             _merchPackItemRepository = merchPackItemRepository;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
@@ -73,7 +77,17 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
                     if (isComplete)
                     {
                         request.Complete(Date.Create(DateTime.Now));
-                        await _merchRequestRepository.UpdateAsync(request, cancellationToken);
+                        await _unitOfWork.StartTransactionAsync(cancellationToken);
+                        try
+                        {
+                            await _merchRequestRepository.UpdateAsync(request, cancellationToken);
+                            await _unitOfWork.SaveChangesAsync(cancellationToken);
+                        }
+                        catch
+                        {
+                            await _unitOfWork.RollbackAsync(cancellationToken);
+                            throw;
+                        }
                     }
                 }
             }

@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using LazyCache;
 using MediatR;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Cache;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
-using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 using static OzonEdu.MerchandiseService.Domain.DomainServices.MerchRequestService;
@@ -17,17 +17,20 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
     public class ProcessMerchRequestCommandHandler
         : IRequestHandler<ProcessMerchRequestCommand, MerchRequestResult>
     {
-        private readonly IApplicationService _applicationService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMerchRequestRepository _merchRequestRepository;
+        private readonly IApplicationService _applicationService;
         private readonly IAppCache _cache;
         private readonly CacheKeysProvider _cacheKeys;
 
         public ProcessMerchRequestCommandHandler(
+            IUnitOfWork unitOfWork,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
             IAppCache cache,
             CacheKeysProvider cacheKeys)
         {
+            _unitOfWork = unitOfWork;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
             _cache = cache;
@@ -90,15 +93,27 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
         {
             _cache.Remove(_cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value));
+
+            await _unitOfWork.StartTransactionAsync(cancellationToken);
+            try
+            {
+                if (merchRequest.Id == 0)
+                {
+                    merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+                }
+                else
+                {
+                    merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+                }
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync(cancellationToken);
+                throw;
+            }
             
-            if (merchRequest.Id == 0)
-            {
-                merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
-            }
-            else
-            {
-                merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
-            }
             return merchRequest;
         }
     }
