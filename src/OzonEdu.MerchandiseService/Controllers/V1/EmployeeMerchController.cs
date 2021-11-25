@@ -20,9 +20,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     {
         private readonly IMediator _mediator;
 
-        public EmployeeMerchController(
-            IMerchForEmployeesService merchForEmployeesMerchForEmployeesService,
-            IMediator mediator)
+        public EmployeeMerchController(IMediator mediator)
         {
             _mediator = mediator;
         }

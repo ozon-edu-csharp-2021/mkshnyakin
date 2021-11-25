@@ -23,10 +23,14 @@ WORKDIR /source/OzonEdu.MerchandiseService.Migrator
 COPY src/OzonEdu.MerchandiseService.Migrator/. .
 
 FROM build5 AS build6
+WORKDIR /source/OzonEdu.StockApi.GrpcClient
+COPY src/OzonEdu.StockApi.GrpcClient/. .
+
+FROM build6 AS build7
 WORKDIR /source/OzonEdu.MerchandiseService
 COPY src/OzonEdu.MerchandiseService/. .
 
-FROM build6 AS publish
+FROM build7 AS publish
 RUN dotnet publish -c Release -o /app
 COPY entrypoint.sh /app/.
 COPY wait-for-it.sh /app/.

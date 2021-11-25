@@ -17,7 +17,7 @@ namespace OzonEdu.MerchandiseService.GrpcServices
     {
         private readonly IMediator _mediator;
 
-        public MerchandiseServiceGrpcService(IMerchForEmployeesService merchForEmployeesService, IMediator mediator)
+        public MerchandiseServiceGrpcService(IMediator mediator)
         {
             _mediator = mediator;
         }

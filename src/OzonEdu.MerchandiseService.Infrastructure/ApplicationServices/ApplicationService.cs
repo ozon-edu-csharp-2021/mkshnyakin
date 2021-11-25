@@ -133,7 +133,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
             }
             catch (Exception e)
             {
-                throw new ItemNotFoundException("MerchPackItems not found because service crashed", e);
+                throw new ItemNotFoundException("MerchPackItems not available because service crashed", e);
             }
 
             try

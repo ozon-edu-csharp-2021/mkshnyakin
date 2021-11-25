@@ -21,7 +21,7 @@ namespace OzonEdu.MerchandiseService
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<DatabaseConnectionOptions>(Configuration.GetSection(nameof(DatabaseConnectionOptions)));
-            services.AddSingleton<IMerchForEmployeesService, Services.MerchForEmployeesService>();
+            services.Configure<OzonEduStockApiGrpcOptions>(Configuration.GetSection(nameof(OzonEduStockApiGrpcOptions)));
             services.AddDomainInfrastructure();
         }
 
