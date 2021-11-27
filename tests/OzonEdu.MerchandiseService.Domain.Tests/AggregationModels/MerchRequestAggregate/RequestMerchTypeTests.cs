@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpCourse.Core.Lib.Enums;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Exceptions;
 using OzonEdu.MerchandiseService.Domain.Models;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
@@ -87,6 +88,22 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.AggregationModels.MerchRequest
             RequestMerchType requestMerchType)
         {
             Assert.Throws<ItemNotFoundException>(() => requestMerchType.ToMerchType());
+        }
+
+        [Theory]
+        [MemberData(nameof(RequestMerchTypeParams))]
+        public void GetById_ReturnsCorrectValues_WhenIdIsValid(RequestMerchType requestMerchType)
+        {
+            var instance = Enumeration.GetById<RequestMerchType>(requestMerchType.Id);
+            Assert.Equal(requestMerchType, instance);
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidRequestMerchTypeParams))]
+        public void GetById_ThrowsCorruptedValueObjectException_WhenIdIsInvalid(RequestMerchType requestMerchType)
+        {
+            Assert.Throws<CorruptedValueObjectException>(() =>
+                Enumeration.GetById<RequestMerchType>(requestMerchType.Id));
         }
     }
 }

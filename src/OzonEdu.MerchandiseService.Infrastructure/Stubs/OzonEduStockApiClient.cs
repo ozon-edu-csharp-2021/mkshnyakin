@@ -8,12 +8,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 {
     public class OzonEduStockApiClient : IOzonEduStockApiClient
     {
-        public Task<int> GetAvailableQuantityAsync(long sku, CancellationToken cancellationToken = default)
-        {
-            var quantity = sku % 3 == 0 ? 0 : 100;
-            return Task.FromResult(quantity);
-        }
-
         public Task<bool> IsAvailable(IEnumerable<long> skus, CancellationToken cancellationToken = default)
         {
             var result = !skus.Any(x => x is >= 4 and <= 5); // ProbationPeriodEndingPack всегда отсутствует

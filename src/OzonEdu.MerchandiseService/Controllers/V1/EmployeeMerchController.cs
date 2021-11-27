@@ -19,13 +19,9 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     public class EmployeeMerchController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IMerchForEmployeesService _merchForEmployeesService;
 
-        public EmployeeMerchController(
-            IMerchForEmployeesService merchForEmployeesMerchForEmployeesService,
-            IMediator mediator)
+        public EmployeeMerchController(IMediator mediator)
         {
-            _merchForEmployeesService = merchForEmployeesMerchForEmployeesService;
             _mediator = mediator;
         }
 
@@ -39,67 +35,53 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [ProducesResponseType(typeof(EmployeeMerchGetResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<EmployeeMerchGetResponse>> GetHistoryForEmployee(
-            int employeeId,
+            long employeeId,
             CancellationToken token)
         {
             var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
             {
                 EmployeeId = employeeId
             };
-            var historyItems = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
+
+            try
+            {
+                var historyItems = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
             
-            if (!historyItems.Any())
+                if (!historyItems.Any())
+                {
+                    var notFoundResponse = new RestErrorResponse
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = $"Merch history not found for employee {employeeId}"
+                    };
+                    return NotFound(notFoundResponse);
+                }
+
+                var response = new EmployeeMerchGetResponse
+                {
+                    Items = historyItems
+                        .Select(x => new EmployeeMerchGetResponseItem
+                        {
+                            Item = new EmployeeMerchItem
+                            {
+                                Name = x.Item.ItemName.Value,
+                                SkuId = x.Item.Sku.Id
+                            },
+                            Date = x.GiveOutDate.Value
+                        })
+                };
+
+                return Ok(response);
+            }
+            catch (ItemNotFoundException e)
             {
                 var notFoundResponse = new RestErrorResponse
                 {
                     Status = StatusCodes.Status404NotFound,
-                    Message = $"Merch history not found for employee {employeeId}"
+                    Message = e.Message
                 };
                 return NotFound(notFoundResponse);
             }
-
-            var response = new EmployeeMerchGetResponse
-            {
-                Items = historyItems
-                    .Select(x => new EmployeeMerchGetResponseItem
-                    {
-                        Item = new EmployeeMerchItem
-                        {
-                            Name = x.Item.ItemName.Value,
-                            SkuId = x.Item.Sku.Id
-                        },
-                        Date = x.GiveOutDate.Value
-                    })
-            };
-
-            /*
-            var items = await _merchForEmployeesService.GetHistoryForEmployee(employeeId, token);
-            if (items is null)
-            {
-                var notFoundResponse = new RestErrorResponse
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Message = $"Merch history not found for employee {employeeId}"
-                };
-                return NotFound(notFoundResponse);
-            }
-
-            var response = new EmployeeMerchGetResponse
-            {
-                Items = items
-                    .Select(x => new EmployeeMerchGetResponseItem
-                    {
-                        Item = new EmployeeMerchItem
-                        {
-                            Name = x.Item.Name,
-                            SkuId = x.Item.SkuId
-                        },
-                        Date = x.Date
-                    })
-            };
-            */
-
-            return Ok(response);
         }
 
         /// <summary>
@@ -115,7 +97,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(RestErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<EmployeeMerchPostResponse>> RequestMerchForEmployee(
-            int employeeId,
+            long employeeId,
             MerchType merchType,
             CancellationToken token)
         {

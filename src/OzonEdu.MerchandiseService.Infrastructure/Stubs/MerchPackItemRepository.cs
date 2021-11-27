@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
-using OzonEdu.MerchandiseService.Domain.Models;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
 {
@@ -30,7 +28,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             var notepad = Create(new MerchPackItem(ItemName.Create("Блокнот с логотипом Ozon"), Sku.Create(2)));
             var blueTshirt = Create(new MerchPackItem(ItemName.Create("Футболка синяя"), Sku.Create(3)));
             var ozonTshirt = Create(new MerchPackItem(ItemName.Create("Футболка с логотипом Ozon"), Sku.Create(4)));
-            var socks = Create(new MerchPackItem(ItemName.Create("Носки с логотипом Ozon "), Sku.Create(5)));
+            var socks = Create(new MerchPackItem(ItemName.Create("Носки с логотипом Ozon"), Sku.Create(5)));
             var backpack = Create(new MerchPackItem(ItemName.Create("Рюкзак для ноутбука"), Sku.Create(6)));
             var sweatshirt = Create(new MerchPackItem(ItemName.Create("Толстовка с логотипом Ozon"), Sku.Create(7)));
 
@@ -72,10 +70,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
         }
 
         public Task<MerchPackItem> DeleteAsync(
-            MerchPackItem merchPackItem,
+            MerchPackItem itemToDelete,
             CancellationToken cancellationToken = default)
         {
-            if (MerchPackItems.TryRemove(merchPackItem.Id, out var deletedItem))
+            if (MerchPackItems.TryRemove(itemToDelete.Id, out var deletedItem))
             {
                 var relationIds = MerchTypeToItemsRelations
                     .Where(x => x.Value.MerchPackItemId == deletedItem.Id)
@@ -90,8 +88,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(deletedItem);
         }
 
-        public Task<IReadOnlyCollection<MerchPackItem>> FindByMerchTypeAsync(
-            RequestMerchType requestMerchType,
+        public Task<IEnumerable<MerchPackItem>> FindByMerchTypeAsync(RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
             var merchPackItems = new List<MerchPackItem>();
@@ -106,12 +103,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 }
             }
 
-            var result = merchPackItems.AsReadOnly() as IReadOnlyCollection<MerchPackItem>;
+            IEnumerable<MerchPackItem> result = merchPackItems;
             return Task.FromResult(result);
         }
 
-        public Task<IReadOnlyCollection<RequestMerchType>> FindMerchTypesBySkuAsync(
-            IEnumerable<long> skuIds,
+        public Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default)
         {
             var merchTypes = new Dictionary<RequestMerchType, bool>();
@@ -137,19 +133,17 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     }
                 }
             }
-
-            var result = merchTypes.Keys
-                    .ToList()
-                    .AsReadOnly()
-                as IReadOnlyCollection<RequestMerchType>;
+            
+            IEnumerable<RequestMerchType> result = merchTypes.Keys;
             return Task.FromResult(result);
         }
 
-        public Task AddToPackAsync(
+        public Task<int> AddToPackAsync(
             RequestMerchType requestMerchType,
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default)
         {
+            var affectedRows = 0;
             foreach (var merchPackItem in merchPackItems)
             {
                 var newRelation = new MerchTypeToItemsRelation
@@ -157,10 +151,13 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     RequestMerchType = requestMerchType,
                     MerchPackItemId = merchPackItem.Id
                 };
-                MerchTypeToItemsRelations.TryAdd(RelationsIdGen.Get(), newRelation);
+                if (MerchTypeToItemsRelations.TryAdd(RelationsIdGen.Get(), newRelation))
+                {
+                    affectedRows++;
+                }
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(affectedRows);
         }
 
 

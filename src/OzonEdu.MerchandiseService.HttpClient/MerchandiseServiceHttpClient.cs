@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CSharpCourse.Core.Lib.Enums;
 using OzonEdu.MerchandiseService.HttpModels;
 using SystemHttpClient = System.Net.Http.HttpClient;
 
@@ -23,7 +24,7 @@ namespace OzonEdu.MerchandiseService.HttpClient
             _httpClient = httpClient;
         }
 
-        public async Task<EmployeeMerchGetResponse> V1GetHistoryForEmployee(int employeeId, CancellationToken token)
+        public async Task<EmployeeMerchGetResponse> V1GetHistoryForEmployee(long employeeId, CancellationToken token)
         {
             var path = $"/api/v1/employee/{employeeId}/merch";
             EmployeeMerchGetResponse result = null;
@@ -63,9 +64,13 @@ namespace OzonEdu.MerchandiseService.HttpClient
             return result;
         }
 
-        public async Task<EmployeeMerchPostResponse> V1RequestMerchForEmployee(int employeeId, CancellationToken token)
+        public async Task<EmployeeMerchPostResponse> V1RequestMerchForEmployee(
+            long employeeId,
+            MerchType merchType,
+            CancellationToken token)
         {
-            var path = $"/api/v1/employee/{employeeId}/merch";
+            var merchTypeInt = (int) merchType;
+            var path = $"/api/v1/employee/{employeeId}/merch/{merchTypeInt}";
             EmployeeMerchPostResponse result = null;
             try
             {

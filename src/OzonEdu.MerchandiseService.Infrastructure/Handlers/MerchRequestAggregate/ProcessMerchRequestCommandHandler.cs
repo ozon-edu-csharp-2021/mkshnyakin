@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using LazyCache;
 using MediatR;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
+using OzonEdu.MerchandiseService.Infrastructure.Cache;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
@@ -14,15 +17,24 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
     public class ProcessMerchRequestCommandHandler
         : IRequestHandler<ProcessMerchRequestCommand, MerchRequestResult>
     {
-        private readonly IApplicationService _applicationService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMerchRequestRepository _merchRequestRepository;
+        private readonly IApplicationService _applicationService;
+        private readonly IAppCache _cache;
+        private readonly CacheKeysProvider _cacheKeys;
 
         public ProcessMerchRequestCommandHandler(
+            IUnitOfWork unitOfWork,
             IMerchRequestRepository merchRequestRepository,
-            IApplicationService applicationService)
+            IApplicationService applicationService,
+            IAppCache cache,
+            CacheKeysProvider cacheKeys)
         {
+            _unitOfWork = unitOfWork;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
+            _cache = cache;
+            _cacheKeys = cacheKeys;
         }
 
         public async Task<MerchRequestResult> Handle(
@@ -75,19 +87,33 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                 ? MerchRequestResult.Success(savedRequest.Status.ToString(), savedRequest.Id)
                 : MerchRequestResult.Fail(savedRequest.Status.ToString(), savedRequest.Id);
 
-            return await Task.FromResult(response);
+            return response;
         }
 
         private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
         {
-            if (merchRequest.Id == 0)
+            _cache.Remove(_cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value));
+
+            await _unitOfWork.StartTransactionAsync(cancellationToken);
+            try
             {
-                merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+                if (merchRequest.Id == 0)
+                {
+                    merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+                }
+                else
+                {
+                    merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+                }
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
-            else
+            catch
             {
-                merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+                await _unitOfWork.RollbackAsync(cancellationToken);
+                throw;
             }
+            
             return merchRequest;
         }
     }

@@ -75,7 +75,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                     Create(merchRequest);
                 }
                 {
-                    var merchRequest = new MerchRequest(employee5, RequestMerchType.ConferenceListenerPack, CreationMode.System);
+                    var merchRequest = new MerchRequest(employee5, RequestMerchType.ConferenceListenerPack,
+                        CreationMode.System);
                     merchRequest.SetStatus(ProcessStatus.OutOfStock);
                     Create(merchRequest);
                 }
@@ -117,9 +118,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(Items[itemToUpdate.Id]);
         }
 
-        public Task<MerchRequest> DeleteAsync(MerchRequest itemToUpdate, CancellationToken cancellationToken = default)
+        public Task<MerchRequest> DeleteAsync(MerchRequest itemToDelete, CancellationToken cancellationToken = default)
         {
-            Items.TryRemove(itemToUpdate.Id, out var merchRequest);
+            Items.TryRemove(itemToDelete.Id, out var merchRequest);
             return Task.FromResult(merchRequest);
         }
 
@@ -128,14 +129,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             CancellationToken cancellationToken = default)
         {
             var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId);
-            return Task.FromResult(result);
-        }
-
-        public Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
-            RequestMerchType requestMerchType,
-            CancellationToken cancellationToken = default)
-        {
-            var result = Items.Values.Where(x => x.MerchType.Equals(requestMerchType));
             return Task.FromResult(result);
         }
 
@@ -154,8 +147,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             CancellationToken cancellationToken = default)
         {
             var result = Items.Values.Where(x =>
-                x.Status.Equals(ProcessStatus.OutOfStock)
-                && requestMerchTypes.Contains(x.MerchType));
+                    x.Status.Equals(ProcessStatus.OutOfStock)
+                    && requestMerchTypes.Contains(x.MerchType));
             return Task.FromResult(result);
         }
     }

@@ -11,15 +11,11 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
             long employeeId,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<MerchRequest>> FindByRequestMerchTypeAsync(
-            RequestMerchType requestMerchType,
-            CancellationToken cancellationToken = default);
-
         Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default);
 
-        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+        Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default);
     }

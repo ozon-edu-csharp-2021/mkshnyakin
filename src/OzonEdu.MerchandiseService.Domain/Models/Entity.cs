@@ -30,7 +30,15 @@ namespace OzonEdu.MerchandiseService.Domain.Models
 
         public bool IsTransient()
         {
-            return this.Id == default(Int32);
+            return this.Id == default(long);
+        }
+
+        public virtual void SetId(long newId)
+        {
+            if (Id == 0)
+            {
+                Id = newId;
+            }
         }
 
         public override bool Equals(object obj)

@@ -6,7 +6,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Contracts
 {
     public interface IOzonEduStockApiClient
     {
-        Task<int> GetAvailableQuantityAsync(long sku, CancellationToken cancellationToken = default);
         Task<bool> IsAvailable(IEnumerable<long> skus, CancellationToken cancellationToken = default);
         Task<bool> Reserve(IEnumerable<long> skus, CancellationToken cancellationToken = default);
     }
