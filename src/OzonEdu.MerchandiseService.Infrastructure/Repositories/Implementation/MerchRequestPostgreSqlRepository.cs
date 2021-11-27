@@ -65,8 +65,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             const string sql = @"
                 select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
-                where id = @Id
-                limit 1;
+                where id = @Id;
             ";
 
             var parameters = new

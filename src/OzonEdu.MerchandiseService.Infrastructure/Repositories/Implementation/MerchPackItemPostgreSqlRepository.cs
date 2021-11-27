@@ -63,8 +63,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             const string sql = @"
                 select id, name, sku 
                 from merch_pack_items
-                where id = @Id
-                limit 1;
+                where id = @Id;
             ";
 
             var parameters = new
