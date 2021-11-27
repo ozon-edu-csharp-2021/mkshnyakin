@@ -88,8 +88,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(deletedItem);
         }
 
-        public Task<IReadOnlyCollection<MerchPackItem>> FindByMerchTypeAsync(
-            RequestMerchType requestMerchType,
+        public Task<IEnumerable<MerchPackItem>> FindByMerchTypeAsync(RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
             var merchPackItems = new List<MerchPackItem>();
@@ -104,12 +103,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 }
             }
 
-            IReadOnlyCollection<MerchPackItem> result = merchPackItems.ToArray();
+            IEnumerable<MerchPackItem> result = merchPackItems;
             return Task.FromResult(result);
         }
 
-        public Task<IReadOnlyCollection<RequestMerchType>> FindMerchTypesBySkuAsync(
-            IEnumerable<long> skuIds,
+        public Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default)
         {
             var merchTypes = new Dictionary<RequestMerchType, bool>();
@@ -136,7 +134,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 }
             }
             
-            IReadOnlyCollection<RequestMerchType> result = merchTypes.Keys.ToArray();
+            IEnumerable<RequestMerchType> result = merchTypes.Keys;
             return Task.FromResult(result);
         }
 

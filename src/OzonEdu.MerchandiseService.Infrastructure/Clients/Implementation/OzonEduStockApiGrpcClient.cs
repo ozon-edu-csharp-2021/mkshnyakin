@@ -38,7 +38,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation
 
             var isSkuAvailable = skus.ToDictionary(k => k, _ => false);
             var response = await _client.GetStockItemsAvailabilityAsync(
-                new SkusRequest {Skus = {skus}},
+                new SkusRequest {Skus = {isSkuAvailable.Keys}},
                 cancellationToken: cancellationToken);
 
             foreach (var item in response.Items)

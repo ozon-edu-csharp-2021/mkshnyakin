@@ -124,44 +124,31 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(merchRequest);
         }
 
-        public Task<IReadOnlyCollection<MerchRequest>> FindByEmployeeIdAsync(
+        public Task<IEnumerable<MerchRequest>> FindByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x => x.EmployeeId.Value == employeeId)
-                .ToArray();
+            var result = Items.Values.Where(x => x.EmployeeId.Value == employeeId);
             return Task.FromResult(result);
         }
 
-        public Task<IReadOnlyCollection<MerchRequest>> FindByRequestMerchTypeAsync(
-            RequestMerchType requestMerchType,
-            CancellationToken cancellationToken = default)
-        {
-            IReadOnlyCollection<MerchRequest> result = Items.Values
-                .Where(x => x.MerchType.Equals(requestMerchType))
-                .ToArray();
-            return Task.FromResult(result);
-        }
-
-        public Task<IReadOnlyCollection<MerchRequest>> FindCompletedByEmployeeIdAsync(
+        public Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x =>
-                    x.EmployeeId.Value.Equals(employeeId)
-                    && x.Status.Equals(ProcessStatus.Complete))
-                .ToArray();
+            var result = Items.Values.Where(x =>
+                x.EmployeeId.Value.Equals(employeeId)
+                && x.Status.Equals(ProcessStatus.Complete));
             return Task.FromResult(result);
         }
 
-        public Task<IReadOnlyCollection<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+        public Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
-            IReadOnlyCollection<MerchRequest> result = Items.Values.Where(x =>
+            var result = Items.Values.Where(x =>
                     x.Status.Equals(ProcessStatus.OutOfStock)
-                    && requestMerchTypes.Contains(x.MerchType))
-                .ToArray();
+                    && requestMerchTypes.Contains(x.MerchType));
             return Task.FromResult(result);
         }
     }

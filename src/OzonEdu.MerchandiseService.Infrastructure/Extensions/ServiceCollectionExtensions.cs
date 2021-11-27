@@ -49,8 +49,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
         private static IServiceCollection AddExternalServices(this IServiceCollection services)
         {
             services.AddSingleton<IMessageBus, MessageBus>();
-            services.AddSingleton<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceClient>();
-            services.AddSingleton<IOzonEduStockApiClient, OzonEduStockApiGrpcClient>();
+            services.AddScoped<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceClient>();
+            services.AddScoped<IOzonEduStockApiClient, OzonEduStockApiGrpcClient>();
             return services;
         }
 

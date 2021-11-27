@@ -56,20 +56,37 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                         e);
                 }
 
-                foreach (var merchRequest in history)
-                {
-                    var merchPackItems =
-                        await _applicationService.GetMerchPackItemsByType(merchRequest.MerchType, cancellationToken);
-
-                    var merchRequestHistoryItems = merchPackItems.Select(x => new MerchRequestHistoryItem
+                var maxDegreeOfParallelism = 1;
+                var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+                var tasks = history.Select(async merchRequest =>
                     {
-                        Item = x,
-                        GiveOutDate = merchRequest.GiveOutDate
-                    });
-
-                    result.AddRange(merchRequestHistoryItems);
-                }
-
+                        await semaphore.WaitAsync(cancellationToken);
+                        try
+                        {
+                            var merchPackItems =
+                                await _applicationService.GetMerchPackItemsByType(
+                                    merchRequest.MerchType,
+                                    cancellationToken);
+                            var merchRequestHistoryItems = merchPackItems.Select(x => new MerchRequestHistoryItem
+                            {
+                                Item = x,
+                                GiveOutDate = merchRequest.GiveOutDate
+                            });
+                            return merchRequestHistoryItems;
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }
+                );
+                var allResults = await Task.WhenAll(tasks);
+                
+                result = allResults
+                    .SelectMany(x => x)
+                    .OrderBy(x => x.GiveOutDate.Value)
+                    .ToList();
+                
                 return result;
             }
 

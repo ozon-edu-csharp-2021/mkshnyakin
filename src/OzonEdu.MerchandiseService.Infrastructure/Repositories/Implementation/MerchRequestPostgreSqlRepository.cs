@@ -63,7 +63,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
         public async Task<MerchRequest> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             const string sql = @"
-                select * 
+                select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
                 where id = @Id
                 limit 1;
@@ -155,12 +155,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return itemToDelete;
         }
 
-        public async Task<IReadOnlyCollection<MerchRequest>> FindByEmployeeIdAsync(
+        public async Task<IEnumerable<MerchRequest>> FindByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
             const string sql = @"
-                select * 
+                select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
                 where employee_id = @EmployeeId;
             ";
@@ -178,8 +178,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
-            var merchRequestItems = await QueryMerchRequestsAsync(connection, commandDefinition);
+            var queryResult = await QueryMerchRequestsAsync(connection, commandDefinition);
 
+            var merchRequestItems = queryResult.ToArray();
             foreach (var merchRequest in merchRequestItems)
             {
                 _changeTracker.Track(merchRequest);
@@ -188,45 +189,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return merchRequestItems;
         }
 
-        public async Task<IReadOnlyCollection<MerchRequest>> FindByRequestMerchTypeAsync(
-            RequestMerchType requestMerchType,
-            CancellationToken cancellationToken = default)
-        {
-            const string sql = @"
-                select * 
-                from merch_requests
-                where merch_type = @MerchType;
-            ";
-
-            var parameters = new
-            {
-                MerchType = requestMerchType.Id
-            };
-
-            var commandDefinition = new CommandDefinition(
-                sql,
-                parameters,
-                commandTimeout: Timeout,
-                cancellationToken: cancellationToken);
-
-            var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
-
-            var merchRequestItems = await QueryMerchRequestsAsync(connection, commandDefinition);
-
-            foreach (var merchRequest in merchRequestItems)
-            {
-                _changeTracker.Track(merchRequest);
-            }
-
-            return merchRequestItems;
-        }
-
-        public async Task<IReadOnlyCollection<MerchRequest>> FindCompletedByEmployeeIdAsync(
+        public async Task<IEnumerable<MerchRequest>> FindCompletedByEmployeeIdAsync(
             long employeeId,
             CancellationToken cancellationToken = default)
         {
             const string sql = @"
-                select * 
+                select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
                 where 
                     employee_id = @EmployeeId
@@ -247,8 +215,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
-            var merchRequestItems = await QueryMerchRequestsAsync(connection, commandDefinition);
+            var queryResult = await QueryMerchRequestsAsync(connection, commandDefinition);
 
+            var merchRequestItems = queryResult.ToArray();
             foreach (var merchRequest in merchRequestItems)
             {
                 _changeTracker.Track(merchRequest);
@@ -257,12 +226,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return merchRequestItems;
         }
 
-        public async Task<IReadOnlyCollection<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
+        public async Task<IEnumerable<MerchRequest>> FindOutOfStockByRequestMerchTypesAsync(
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
             const string sql = @"
-                select * 
+                select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
                 where 
                     status = @Status
@@ -283,8 +252,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
-            var merchRequestItems = await QueryMerchRequestsAsync(connection, commandDefinition);
-
+            var queryResult = await QueryMerchRequestsAsync(connection, commandDefinition);
+            
+            var merchRequestItems = queryResult.ToArray();
             foreach (var merchRequest in merchRequestItems)
             {
                 _changeTracker.Track(merchRequest);
@@ -293,12 +263,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return merchRequestItems;
         }
 
-        private static async Task<IReadOnlyCollection<MerchRequest>> QueryMerchRequestsAsync(
+        private static async Task<IEnumerable<MerchRequest>> QueryMerchRequestsAsync(
             NpgsqlConnection connection,
             CommandDefinition commandDefinition)
         {
             var merchRequestModels = await connection.QueryAsync<Models.MerchRequest>(commandDefinition);
-            var merchRequestItems = merchRequestModels.Select(CreateMerchRequestByModel).ToArray();
+            var merchRequestItems = merchRequestModels.Select(CreateMerchRequestByModel);
             return merchRequestItems;
         }
 

@@ -38,8 +38,24 @@ namespace OzonEdu.MerchandiseService.Domain.Models
 
         public int CompareTo(object other) => Id.CompareTo(((Enumeration) other).Id);
 
-        public static T GetById<T>(int id) where T : Enumeration =>
-            GetAll<T>().FirstOrDefault(x => x.Id == id)
-            ?? throw new CorruptedValueObjectException($"{nameof(T)} not found for id={id}");
+        public static T GetById<T>(int id) where T : Enumeration
+        {
+            T result;
+            try
+            {
+                result = GetAll<T>().SingleOrDefault(x => x.Id == id);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new CorruptedValueObjectException($"More than one {typeof(T).Name} found for id={id}", e);
+            }
+            catch (Exception e)
+            {
+                throw new CorruptedValueObjectException(e.Message, e);
+            }
+            
+            return result
+                   ?? throw new CorruptedValueObjectException($"{typeof(T).Name} not found for id={id}");
+        }
     }
 }

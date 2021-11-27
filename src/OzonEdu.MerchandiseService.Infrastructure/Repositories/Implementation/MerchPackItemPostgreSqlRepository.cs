@@ -61,7 +61,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
         public async Task<MerchPackItem> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             const string sql = @"
-                select * 
+                select id, name, sku 
                 from merch_pack_items
                 where id = @Id
                 limit 1;
@@ -148,7 +148,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return itemToDelete;
         }
 
-        public async Task<IReadOnlyCollection<MerchPackItem>> FindByMerchTypeAsync(
+        public async Task<IEnumerable<MerchPackItem>> FindByMerchTypeAsync(
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
@@ -176,8 +176,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
-            var merchPackItems = await QueryMerchPackItemsAsync(connection, commandDefinition);
+            var queryResult = await QueryMerchPackItemsAsync(connection, commandDefinition);
 
+            var merchPackItems = queryResult as MerchPackItem[] ?? queryResult.ToArray();
             foreach (var merchPackItem in merchPackItems)
             {
                 _changeTracker.Track(merchPackItem);
@@ -186,7 +187,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return merchPackItems;
         }
 
-        public async Task<IReadOnlyCollection<RequestMerchType>> FindMerchTypesBySkuAsync(
+        public async Task<IEnumerable<RequestMerchType>> FindMerchTypesBySkuAsync(
             IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default)
         {
@@ -213,7 +214,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
             var requestMerchTypeIds = await connection.QueryAsync<int>(commandDefinition);
-            var requestMerchTypes = requestMerchTypeIds.Select(Enumeration.GetById<RequestMerchType>).ToArray();
+            var requestMerchTypes = requestMerchTypeIds.Select(Enumeration.GetById<RequestMerchType>);
             return requestMerchTypes;
         }
 
@@ -246,12 +247,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             return affectedRows;
         }
 
-        private static async Task<IReadOnlyCollection<MerchPackItem>> QueryMerchPackItemsAsync(
+        private static async Task<IEnumerable<MerchPackItem>> QueryMerchPackItemsAsync(
             NpgsqlConnection connection,
             CommandDefinition commandDefinition)
         {
             var merchPackItemModels = await connection.QueryAsync<Models.MerchPackItem>(commandDefinition);
-            var merchPackItems = merchPackItemModels.Select(CreateMerchPackItemByModel).ToArray();
+            var merchPackItems = merchPackItemModels.Select(CreateMerchPackItemByModel);
             return merchPackItems;
         }
 
