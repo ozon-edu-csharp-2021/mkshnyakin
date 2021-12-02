@@ -24,6 +24,15 @@ namespace OzonEdu.MerchandiseService
             services.Configure<DatabaseConnectionOptions>(Configuration.GetSection(nameof(DatabaseConnectionOptions)));
             services.Configure<OzonEduStockApiGrpcOptions>(Configuration.GetSection(nameof(OzonEduStockApiGrpcOptions)));
             services.Configure<EmailOptions>(Configuration.GetSection(nameof(EmailOptions)));
+            services.Configure<RedisOptions>(Configuration.GetSection(nameof(RedisOptions)));
+            
+            var redisOptions = Configuration.GetSection(nameof(RedisOptions)).Get<RedisOptions>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.InstanceName = redisOptions.InstanceName;
+                options.Configuration = redisOptions.Configuration;
+            });
+
             services.AddDomainInfrastructure();
         }
 

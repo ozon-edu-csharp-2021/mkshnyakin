@@ -13,6 +13,7 @@ services:
     environment:
       DatabaseConnectionOptions__ConnectionString: "Host=host.docker.internal;Port=5424;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
       OzonEduStockApiGrpcOptions__Address: "http://host.docker.internal:5072"
+      RedisOptions__Configuration: "redis:6379"
     depends_on:
       - merchandise-service-db
     command: ["./wait-for-it.sh", "merchandise-service-db:5432", "--", "./entrypoint.sh"]

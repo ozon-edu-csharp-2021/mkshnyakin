@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using LazyCache;
 using MediatR;
+using Microsoft.Extensions.Caching.Distributed;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
@@ -20,14 +20,14 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IApplicationService _applicationService;
-        private readonly IAppCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly CacheKeysProvider _cacheKeys;
 
         public ProcessMerchRequestCommandHandler(
             IUnitOfWork unitOfWork,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
-            IAppCache cache,
+            IDistributedCache cache,
             CacheKeysProvider cacheKeys)
         {
             _unitOfWork = unitOfWork;
@@ -92,7 +92,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
 
         private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
         {
-            _cache.Remove(_cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value));
+            var key = _cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value);
+            await _cache.RemoveAsync(key, cancellationToken);
 
             await _unitOfWork.StartTransactionAsync(cancellationToken);
             try

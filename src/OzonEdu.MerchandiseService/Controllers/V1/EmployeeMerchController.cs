@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using OzonEdu.MerchandiseService.HttpModels;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
-using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
 {
@@ -45,9 +43,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
 
             try
             {
-                var historyItems = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
-            
-                if (!historyItems.Any())
+                var results = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
+
+                var historyItems = results.ToList();
+                if (historyItems.Count == 0)
                 {
                     var notFoundResponse = new RestErrorResponse
                     {
@@ -64,10 +63,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                         {
                             Item = new EmployeeMerchItem
                             {
-                                Name = x.Item.ItemName.Value,
-                                SkuId = x.Item.Sku.Id
+                                Name = x.Item.Name,
+                                SkuId = x.Item.Sku
                             },
-                            Date = x.GiveOutDate.Value
+                            Date = x.GiveOutDate
                         })
                 };
 
@@ -119,7 +118,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                     };
                     return Conflict(conflictResponse);
                 }
-                
+
                 var response = new EmployeeMerchPostResponse
                 {
                     RequestId = result.RequestId,

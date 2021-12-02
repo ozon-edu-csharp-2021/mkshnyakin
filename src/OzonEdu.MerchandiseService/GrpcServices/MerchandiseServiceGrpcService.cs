@@ -9,7 +9,6 @@ using MediatR;
 using OzonEdu.MerchandiseService.Grpc;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
-using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.GrpcServices
 {
@@ -54,10 +53,10 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             {
                 Item = new EmployeeMerchItem
                 {
-                    Name = x.Item.ItemName.Value,
-                    SkuId = x.Item.Sku.Id
+                    Name = x.Item.Name,
+                    SkuId = x.Item.Sku
                 },
-                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.GiveOutDate.Value, DateTimeKind.Utc))
+                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.GiveOutDate, DateTimeKind.Utc))
             });
 
             var result = new GetHistoryForEmployeeResponse
