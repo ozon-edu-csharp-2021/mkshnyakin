@@ -25,6 +25,7 @@ namespace OzonEdu.MerchandiseService
             services.Configure<OzonEduStockApiGrpcOptions>(Configuration.GetSection(nameof(OzonEduStockApiGrpcOptions)));
             services.Configure<EmailOptions>(Configuration.GetSection(nameof(EmailOptions)));
             services.Configure<RedisOptions>(Configuration.GetSection(nameof(RedisOptions)));
+            services.Configure<KafkaConfiguration>(Configuration.GetSection(nameof(KafkaConfiguration)));
             services.AddDomainInfrastructure(Configuration);
         }
 

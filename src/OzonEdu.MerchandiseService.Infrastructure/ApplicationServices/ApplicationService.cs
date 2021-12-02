@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Confluent.Kafka;
+using CSharpCourse.Core.Lib.Enums;
+using CSharpCourse.Core.Lib.Events;
 using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
-using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 using OzonEdu.MerchandiseService.Infrastructure.Stubs;
@@ -40,23 +43,26 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
         private readonly IMerchPackItemRepository _merchPackItemRepository;
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IOzonEduStockApiClient _ozonEduStockApiClient;
-        private readonly IMessageBus _messageBus;
         private readonly EmailOptions _emailOptions;
+        private readonly IProducer<string, string> _producer;
+        private readonly KafkaConfiguration _kafkaOptions;
 
         public ApplicationService(
             IOzonEduEmployeeServiceClient employeeClient,
             IMerchPackItemRepository merchPackItemRepository,
             IMerchRequestRepository merchRequestRepository,
             IOzonEduStockApiClient ozonEduStockApiClient,
-            IMessageBus messageBus,
-            IOptions<EmailOptions> emailOptions)
+            IOptions<EmailOptions> emailOptions,
+            IProducer<string, string> producer,
+            IOptions<KafkaConfiguration> kafkaOptions)
         {
             _employeeClient = employeeClient;
             _merchPackItemRepository = merchPackItemRepository;
             _merchRequestRepository = merchRequestRepository;
             _ozonEduStockApiClient = ozonEduStockApiClient;
-            _messageBus = messageBus;
             _emailOptions = emailOptions.Value;
+            _producer = producer;
+            _kafkaOptions = kafkaOptions.Value;
         }
 
         public async Task<Employee> GetEmployee(long id, string email, CancellationToken cancellationToken = default)
@@ -159,25 +165,41 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
             {
                 if (isAllOk)
                 {
-                    var employeeEmailMessage = new EmailMessage
+                    var message = new Message<string, string>
                     {
-                        ToEmail = employee.Email.Value,
-                        ToName = employee.Name.ToString(),
-                        Subject = _emailOptions.EmployeeSystemSubject,
-                        Body = string.Empty
+                        Key = employee.Id.ToString(),
+                        Value = JsonSerializer.Serialize(new NotificationEvent
+                        {
+                            EmployeeName = employee.Name.ToString(),
+                            EmployeeEmail = employee.Email.Value,
+                            EventType = EmployeeEventType.MerchDelivery,
+                            Payload = new MerchDeliveryEventPayload
+                            {
+                                MerchType = request.MerchType.ToMerchType(),
+                                ClothingSize = ClothingSize.L
+                            }
+                        })
                     };
-                    _messageBus.Notify(employeeEmailMessage);
+                    await _producer.ProduceAsync(_kafkaOptions.EmailingServiceTopic, message, cancellationToken);
                 }
                 else
                 {
-                    var employeeEmailMessage = new EmailMessage
+                    var message = new Message<string, string>
                     {
-                        ToEmail = _emailOptions.HrToEmail,
-                        ToName = _emailOptions.HrToName,
-                        Subject = _emailOptions.HrSubject,
-                        Body = $"SkuIds: {string.Join(", ", items)}"
+                        Key = employee.Id.ToString(),
+                        Value = JsonSerializer.Serialize(new NotificationEvent
+                        {
+                            ManagerEmail = _emailOptions.HrToEmail,
+                            EmployeeName = _emailOptions.HrToName,
+                            EventType = EmployeeEventType.MerchDelivery,
+                            Payload = new MerchDeliveryEventPayload
+                            {
+                                MerchType = request.MerchType.ToMerchType(),
+                                ClothingSize = ClothingSize.L
+                            }
+                        })
                     };
-                    _messageBus.Notify(employeeEmailMessage);
+                    await _producer.ProduceAsync(_kafkaOptions.EmailingServiceTopic, message, cancellationToken);
                 }
             }
 

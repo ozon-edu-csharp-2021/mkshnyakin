@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Confluent.Kafka;
+using CSharpCourse.Core.Lib.Enums;
+using CSharpCourse.Core.Lib.Events;
 using MediatR;
 using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
@@ -10,7 +14,7 @@ using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
-using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
+using OzonEdu.MerchandiseService.Infrastructure.Extensions;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
 {
@@ -20,23 +24,23 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
         private readonly IMerchPackItemRepository _merchPackItemRepository;
         private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IApplicationService _applicationService;
-        private readonly IMessageBus _messageBus;
-        private readonly EmailOptions _emailOptions;
+        private readonly IProducer<string, string> _producer;
+        private readonly KafkaConfiguration _kafkaOptions;
 
         public ProcessSupplyEventCommandHandler(
             IUnitOfWork unitOfWork,
             IMerchPackItemRepository merchPackItemRepository,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
-            IMessageBus messageBus,
-            IOptions<EmailOptions> emailOptions)
+            IProducer<string, string> producer,
+            IOptions<KafkaConfiguration> kafkaOptions)
         {
             _unitOfWork = unitOfWork;
             _merchPackItemRepository = merchPackItemRepository;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
-            _messageBus = messageBus;
-            _emailOptions = emailOptions.Value;
+            _producer = producer;
+            _kafkaOptions = kafkaOptions.Value;
         }
 
         public async Task<Unit> Handle(ProcessSupplyEventCommand command, CancellationToken cancellationToken)
@@ -57,14 +61,22 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.SupplyEvent
                 // что интересующий его мерч появился на остатках.
                 if (request.Mode.Equals(CreationMode.User))
                 {
-                    var employeeEmailMessage = new EmailMessage
+                    var message = new Message<string, string>
                     {
-                        ToEmail = employee.Email.Value,
-                        ToName = employee.Name.ToString(),
-                        Subject = _emailOptions.EmployeeUserSubject,
-                        Body = string.Empty
+                        Key = employee.Id.ToString(),
+                        Value = JsonSerializer.Serialize(new NotificationEvent
+                        {
+                            EmployeeName = employee.Name.ToString(),
+                            EmployeeEmail = employee.Email.Value,
+                            EventType = EmployeeEventType.MerchDelivery,
+                            Payload = new MerchDeliveryEventPayload
+                            {
+                                MerchType = request.MerchType.ToMerchType(),
+                                ClothingSize = ClothingSize.L
+                            }
+                        })
                     };
-                    _messageBus.Notify(employeeEmailMessage);
+                    await _producer.ProduceAsync(_kafkaOptions.EmailingServiceTopic, message, cancellationToken);
 
                     continue;
                 }

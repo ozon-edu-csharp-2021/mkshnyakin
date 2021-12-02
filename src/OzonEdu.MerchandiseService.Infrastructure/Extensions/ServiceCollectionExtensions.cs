@@ -1,6 +1,9 @@
-﻿using MediatR;
+﻿using System;
+using Confluent.Kafka;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
@@ -10,7 +13,6 @@ using OzonEdu.MerchandiseService.Infrastructure.Cache;
 using OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
-using OzonEdu.MerchandiseService.Infrastructure.Contracts.MessageBus;
 using OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure;
@@ -31,6 +33,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             services.AddExternalServices();
             services.AddApplicationServices();
             services.AddCache(configuration);
+            services.AddKafka(configuration);
             return services;
         }
 
@@ -41,7 +44,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             services.AddScoped<IChangeTracker, ChangeTracker>();
             return services;
         }
-        
+
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -52,7 +55,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
 
         private static IServiceCollection AddExternalServices(this IServiceCollection services)
         {
-            services.AddSingleton<IMessageBus, MessageBus>();
             services.AddScoped<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceClient>();
             services.AddScoped<IOzonEduStockApiClient, OzonEduStockApiGrpcClient>();
             return services;
@@ -63,11 +65,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             services.AddScoped<IApplicationService, ApplicationService>();
             return services;
         }
-        
+
         private static IServiceCollection AddCache(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<CacheKeysProvider>();
-                        
+
             var redisOptions = configuration.GetSection(nameof(RedisOptions)).Get<RedisOptions>();
             services.AddStackExchangeRedisCache(options =>
             {
@@ -75,6 +77,23 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
                 options.Configuration = redisOptions.Configuration;
             });
 
+            return services;
+        }
+
+        private static IServiceCollection AddKafka(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<IProducer<string, string>>(di =>
+            {
+                var iOptions = di.GetService<IOptions<KafkaConfiguration>>()
+                               ?? throw new NullReferenceException($"{nameof(KafkaConfiguration)} is null");
+                var kafkaConfiguration = iOptions.Value;
+                var producerConfig = new ProducerConfig
+                {
+                    BootstrapServers = kafkaConfiguration.BootstrapServers
+                };
+                var builder = new ProducerBuilder<string, string>(producerConfig);
+                return builder.Build();
+            });
             return services;
         }
     }

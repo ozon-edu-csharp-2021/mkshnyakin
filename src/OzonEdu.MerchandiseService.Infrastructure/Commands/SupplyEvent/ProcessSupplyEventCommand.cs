@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using CSharpCourse.Core.Lib.Events;
+using CSharpCourse.Core.Lib.Models;
 using MediatR;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent
