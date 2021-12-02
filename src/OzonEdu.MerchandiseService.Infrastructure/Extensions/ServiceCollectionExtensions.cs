@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
@@ -20,14 +21,16 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddDomainInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddDomainInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             services.AddMediatR(typeof(ProcessMerchRequestCommandHandler).Assembly);
             services.AddDatabaseComponents();
             services.AddRepositories();
             services.AddExternalServices();
             services.AddApplicationServices();
-            services.AddCache();
+            services.AddCache(configuration);
             return services;
         }
 
@@ -61,9 +64,17 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
             return services;
         }
         
-        private static IServiceCollection AddCache(this IServiceCollection services)
+        private static IServiceCollection AddCache(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<CacheKeysProvider>();
+                        
+            var redisOptions = configuration.GetSection(nameof(RedisOptions)).Get<RedisOptions>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.InstanceName = redisOptions.InstanceName;
+                options.Configuration = redisOptions.Configuration;
+            });
+
             return services;
         }
     }

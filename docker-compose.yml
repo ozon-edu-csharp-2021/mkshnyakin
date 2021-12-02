@@ -11,8 +11,8 @@ services:
     networks:
       - ozon-network
     environment:
-      DatabaseConnectionOptions__ConnectionString: "Host=host.docker.internal;Port=5424;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
-      OzonEduStockApiGrpcOptions__Address: "http://host.docker.internal:5072"
+      DatabaseConnectionOptions__ConnectionString: "Host=merchandise-service-db;Port=5432;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
+      OzonEduStockApiGrpcOptions__Address: "http://stock-api:82"
       RedisOptions__Configuration: "redis:6379"
     depends_on:
       - merchandise-service-db
@@ -44,11 +44,11 @@ services:
       BootstrapServers: "broker:29092"
       topic: "stock_replenished_event"
       groupId : "stock-api-service"
-      SupplyApiGrpcServiceConfiguration__ServerAddress: "http://localhost:5082"
+      SupplyApiGrpcServiceConfiguration__ServerAddress: "http://supply-service:5082"
     depends_on:
       - stock-api-db
       - redis
-      - supply-service-api
+      - supply-service
       - zookeeper
       - broker
 

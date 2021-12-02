@@ -25,15 +25,7 @@ namespace OzonEdu.MerchandiseService
             services.Configure<OzonEduStockApiGrpcOptions>(Configuration.GetSection(nameof(OzonEduStockApiGrpcOptions)));
             services.Configure<EmailOptions>(Configuration.GetSection(nameof(EmailOptions)));
             services.Configure<RedisOptions>(Configuration.GetSection(nameof(RedisOptions)));
-            
-            var redisOptions = Configuration.GetSection(nameof(RedisOptions)).Get<RedisOptions>();
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.InstanceName = redisOptions.InstanceName;
-                options.Configuration = redisOptions.Configuration;
-            });
-
-            services.AddDomainInfrastructure();
+            services.AddDomainInfrastructure(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
