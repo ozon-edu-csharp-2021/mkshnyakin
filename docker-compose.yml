@@ -14,6 +14,7 @@ services:
       DatabaseConnectionOptions__ConnectionString: "Host=merchandise-service-db;Port=5432;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
       OzonEduStockApiGrpcOptions__Address: "http://stock-api:82"
       RedisOptions__Configuration: "redis:6379"
+      KafkaConfiguration__BootstrapServers: "broker:29092"
     depends_on:
       - merchandise-service-db
     command: ["./wait-for-it.sh", "merchandise-service-db:5432", "--", "./entrypoint.sh"]
@@ -60,6 +61,7 @@ services:
     environment:
       DbConfiguration__ConnectionString: "Host=supply-service-db;Port=5432;Database=supply-service;Username=postgres;Password=supplyServicePassword"
       KafkaConfiguration__BootstrapServers: "broker:29092"
+#      KafkaConfiguration__SupplyShippedTopicName: "supply_ship_event"
     networks:
       - ozon-network
     depends_on:
@@ -90,6 +92,8 @@ services:
       - "8555:80"
     environment:
       KafkaTopics__EmployeeNotificationEventTopic: "employee_notification_event"
+      KafkaOptions__Servers: "broker:29092"
+      KafkaOptions__ConsumerGroup: "emailing-service-group"
     depends_on:
       - zookeeper
       - broker
@@ -181,6 +185,13 @@ services:
     ports:
       - "6831:6831/udp"
       - "16686:16686"
+#      - "5775:5775/udp"
+#      - "6831:6831/udp"
+#      - "6832:6832/udp"
+#      - "5778:5778"
+#      - "16686:16686"
+#      - "14268:14268"
+#      - "9411:9411"
     networks:
       - ozon-network
 

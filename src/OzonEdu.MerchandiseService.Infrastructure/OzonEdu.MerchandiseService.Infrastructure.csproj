@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Confluent.Kafka.AdminClient\Confluent.Kafka.AdminClient.csproj" />
       <ProjectReference Include="..\OzonEdu.MerchandiseService.Domain\OzonEdu.MerchandiseService.Domain.csproj" />
       <ProjectReference Include="..\OzonEdu.MerchandiseService.Migrator\OzonEdu.MerchandiseService.Migrator.csproj" />
       <ProjectReference Include="..\OzonEdu.StockApi.GrpcClient\OzonEdu.StockApi.GrpcClient.csproj" />

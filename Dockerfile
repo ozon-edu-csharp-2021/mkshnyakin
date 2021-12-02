@@ -27,11 +27,16 @@ WORKDIR /source/OzonEdu.StockApi.GrpcClient
 COPY src/OzonEdu.StockApi.GrpcClient/. .
 
 FROM build6 AS build7
+WORKDIR /source/Confluent.Kafka.AdminClient
+COPY src/Confluent.Kafka.AdminClient/. .
+
+FROM build7 AS build8
 WORKDIR /source/OzonEdu.MerchandiseService
 COPY src/OzonEdu.MerchandiseService/. .
 
-FROM build7 AS publish
+FROM build8 AS publish
 RUN dotnet publish -c Release -o /app
+COPY create-kafka-topics.sh /app/.
 COPY entrypoint.sh /app/.
 COPY wait-for-it.sh /app/.
 
