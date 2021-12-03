@@ -16,6 +16,7 @@ services:
       OzonEduEmployeeServiceHttpOptions__BaseAddress: "http://employees-service:80"
       RedisOptions__Configuration: "redis:6379"
       KafkaConfiguration__BootstrapServers: "broker:29092"
+      JaegerOptions__UdpSenderHost: "jaeger"
     depends_on:
       - merchandise-service-db
     command: ["./wait-for-it.sh", "merchandise-service-db:5432", "--", "./entrypoint.sh"]
@@ -62,7 +63,6 @@ services:
     environment:
       DbConfiguration__ConnectionString: "Host=supply-service-db;Port=5432;Database=supply-service;Username=postgres;Password=supplyServicePassword"
       KafkaConfiguration__BootstrapServers: "broker:29092"
-#      KafkaConfiguration__SupplyShippedTopicName: "supply_ship_event"
     networks:
       - ozon-network
     depends_on:
@@ -188,13 +188,6 @@ services:
     ports:
       - "6831:6831/udp"
       - "16686:16686"
-#      - "5775:5775/udp"
-#      - "6831:6831/udp"
-#      - "6832:6832/udp"
-#      - "5778:5778"
-#      - "16686:16686"
-#      - "14268:14268"
-#      - "9411:9411"
     networks:
       - ozon-network
 
@@ -203,8 +196,6 @@ networks:
     driver: bridge
 
 volumes:
-  ozon-volume:
-    driver: local
   employees-service:
     driver: local
   emailing-service:

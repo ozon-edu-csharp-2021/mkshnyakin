@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.GrpcServices;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
-using OzonEdu.MerchandiseService.Services;
+using OzonEdu.MerchandiseService.Platform.Jaeger;
 
 namespace OzonEdu.MerchandiseService
 {
@@ -27,6 +26,7 @@ namespace OzonEdu.MerchandiseService
             services.Configure<EmailOptions>(Configuration.GetSection(nameof(EmailOptions)));
             services.Configure<RedisOptions>(Configuration.GetSection(nameof(RedisOptions)));
             services.Configure<KafkaConfiguration>(Configuration.GetSection(nameof(KafkaConfiguration)));
+            services.Configure<JaegerOptions>(Configuration.GetSection(nameof(JaegerOptions)));
             services.AddDomainInfrastructure(Configuration);
         }
 
