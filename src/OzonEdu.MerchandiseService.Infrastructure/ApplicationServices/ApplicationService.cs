@@ -180,7 +180,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                             }
                         })
                     };
-                    await _producer.ProduceAsync(_kafkaOptions.EmailingServiceTopic, message, cancellationToken);
+                    _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
                 }
                 else
                 {
@@ -199,7 +199,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
                             }
                         })
                     };
-                    await _producer.ProduceAsync(_kafkaOptions.EmailingServiceTopic, message, cancellationToken);
+                    _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
                 }
             }
 

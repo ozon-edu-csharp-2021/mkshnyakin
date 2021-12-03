@@ -13,6 +13,7 @@ services:
     environment:
       DatabaseConnectionOptions__ConnectionString: "Host=merchandise-service-db;Port=5432;Database=merchandise-service;Username=postgres;Password=merchandiseServicePassword"
       OzonEduStockApiGrpcOptions__Address: "http://stock-api:82"
+      OzonEduEmployeeServiceHttpOptions__BaseAddress: "http://employees-service:80"
       RedisOptions__Configuration: "redis:6379"
       KafkaConfiguration__BootstrapServers: "broker:29092"
     depends_on:

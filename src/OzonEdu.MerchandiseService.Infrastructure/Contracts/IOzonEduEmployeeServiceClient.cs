@@ -13,9 +13,5 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Contracts
         Task<OzonEduEmployeeServiceClient.EmployeeViewModel> GetByEmailAsync(
             string email,
             CancellationToken cancellationToken = default);
-        
-        Task<OzonEduEmployeeServiceClient.EmployeeViewModel> FindByEmailAsync(
-            string employeeEmail,
-            CancellationToken cancellationToken = default);
     }
 }

@@ -14,6 +14,7 @@ using OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.HostedServices;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure.Interfaces;
@@ -55,7 +56,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
 
         private static IServiceCollection AddExternalServices(this IServiceCollection services)
         {
-            services.AddScoped<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceClient>();
+            services.AddScoped<IOzonEduEmployeeServiceClient, OzonEduEmployeeServiceHttpClient>();
             services.AddScoped<IOzonEduStockApiClient, OzonEduStockApiGrpcClient>();
             return services;
         }
@@ -94,6 +95,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
                 var builder = new ProducerBuilder<string, string>(producerConfig);
                 return builder.Build();
             });
+
+            services.AddHostedService<EmployeeNotificationEventConsumerBackgroundService>();
             return services;
         }
     }
