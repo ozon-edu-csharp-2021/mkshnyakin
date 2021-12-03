@@ -75,7 +75,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
                                 _ => (MerchType) 0
                             };
 
-                            if ((int) merchType == 0) continue;
+                            if ((int) merchType == 0)
+                            {
+                                consumer.Commit();
+                                continue;
+                            }
 
                             var command = new ProcessMerchRequestCommand
                             {

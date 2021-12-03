@@ -5,6 +5,7 @@ using CSharpCourse.Core.Lib.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OpenTracing;
 using OzonEdu.MerchandiseService.HttpModels;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
@@ -17,10 +18,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     public class EmployeeMerchController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ITracer _tracer;
 
-        public EmployeeMerchController(IMediator mediator)
+        public EmployeeMerchController(IMediator mediator, ITracer tracer)
         {
             _mediator = mediator;
+            _tracer = tracer;
         }
 
         /// <summary>
@@ -36,6 +39,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             long employeeId,
             CancellationToken token)
         {
+            using var span = _tracer.BuildSpan(nameof(GetHistoryForEmployee)).StartActive();
+            span.Span.SetTag("protocol", "http");
+            span.Span.SetTag(nameof(employeeId), employeeId);
+            
             var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
             {
                 EmployeeId = employeeId
@@ -100,6 +107,11 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             MerchType merchType,
             CancellationToken token)
         {
+            using var span = _tracer.BuildSpan(nameof(RequestMerchForEmployee)).StartActive();
+            span.Span.SetTag("protocol", "http");
+            span.Span.SetTag(nameof(employeeId), employeeId);
+            span.Span.SetTag(nameof(merchType), merchType.ToString());
+
             var processUserMerchRequestCommand = new ProcessMerchRequestCommand
             {
                 EmployeeId = employeeId,
@@ -109,6 +121,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             try
             {
                 var result = await _mediator.Send(processUserMerchRequestCommand, token);
+                span.Span.SetTag(nameof(result.IsSuccess), result.IsSuccess);
                 if (!result.IsSuccess)
                 {
                     var conflictResponse = new RestErrorResponse

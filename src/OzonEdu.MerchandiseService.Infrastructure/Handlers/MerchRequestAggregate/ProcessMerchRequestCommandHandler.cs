@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
@@ -22,25 +23,32 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         private readonly IApplicationService _applicationService;
         private readonly IDistributedCache _cache;
         private readonly CacheKeysProvider _cacheKeys;
-
+        private readonly ITracer _tracer;
+        
         public ProcessMerchRequestCommandHandler(
             IUnitOfWork unitOfWork,
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
             IDistributedCache cache,
-            CacheKeysProvider cacheKeys)
+            CacheKeysProvider cacheKeys,
+            ITracer tracer)
         {
             _unitOfWork = unitOfWork;
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
             _cache = cache;
             _cacheKeys = cacheKeys;
+            _tracer = tracer;
         }
 
         public async Task<MerchRequestResult> Handle(
             ProcessMerchRequestCommand command,
             CancellationToken cancellationToken)
         {
+            using var span = _tracer
+                .BuildSpan(nameof(ProcessMerchRequestCommandHandler))
+                .StartActive();
+            
             var requestMerchType = command.MerchType.ToRequestMerchType();
             var creationMode = command.IsSystem ? CreationMode.System : CreationMode.User;
             var employeeEmail = command.EmployeeEmail;
@@ -92,6 +100,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
 
         private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
         {
+            using var span = _tracer.BuildSpan(nameof(SaveRequest)).StartActive();
+            
             var key = _cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value);
             await _cache.RemoveAsync(key, cancellationToken);
 

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
 using OzonEdu.MerchandiseService.Infrastructure.Cache;
@@ -26,29 +27,37 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
         {
             IncludeFields = true
         };
+        private readonly ITracer _tracer;
 
         public GetMerchRequestHistoryForEmployeeIdCommandCommandHandler(
             IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
             CacheKeysProvider cacheKeys,
-            IDistributedCache distributedCache)
+            IDistributedCache distributedCache,
+            ITracer tracer)
         {
             _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
             _cacheKeys = cacheKeys;
             _distributedCache = distributedCache;
+            _tracer = tracer;
         }
 
         public async Task<IEnumerable<MerchRequestHistoryItem>> Handle(
             GetMerchRequestHistoryForEmployeeIdCommand request,
             CancellationToken cancellationToken)
         {
+            using var span = _tracer
+                .BuildSpan(nameof(GetMerchRequestHistoryForEmployeeIdCommandCommandHandler))
+                .StartActive();
+
             var key = _cacheKeys.GetMerchRequestHistoryKey(request.EmployeeId);
 
             {
                 var cacheValue = await _distributedCache.GetStringAsync(key, cancellationToken);
                 if (!string.IsNullOrEmpty(cacheValue))
                 {
+                    span.Span.SetTag("cached", true);
                     return JsonSerializer.Deserialize<List<MerchRequestHistoryItem>>(cacheValue, _serializerOptions);
                 }
             }
@@ -60,9 +69,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
                 var cacheValue = await _distributedCache.GetStringAsync(key, cancellationToken);
                 if (!string.IsNullOrEmpty(cacheValue))
                 {
+                    span.Span.SetTag("cached", true);
                     return JsonSerializer.Deserialize<List<MerchRequestHistoryItem>>(cacheValue, _serializerOptions);
                 }
 
+                span.Span.SetTag("cached", false);
                 var result = await GetHistoryForEmployee(request.EmployeeId, cancellationToken);
                 var value = JsonSerializer.Serialize(result, _serializerOptions);
                 var options = new DistributedCacheEntryOptions
@@ -83,6 +94,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             long employeeId,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(GetHistoryForEmployee)).StartActive();
+            
             IEnumerable<MerchRequest> history;
 
             try

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Models;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure.Interfaces;
@@ -15,19 +16,24 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
         private const int Timeout = 5;
         private readonly IChangeTracker _changeTracker;
         private readonly IDbConnectionFactory<NpgsqlConnection> _dbConnectionFactory;
+        private readonly ITracer _tracer;
 
         public MerchRequestPostgreSqlRepository(
             IDbConnectionFactory<NpgsqlConnection> dbConnectionFactory,
-            IChangeTracker changeTracker)
+            IChangeTracker changeTracker,
+            ITracer tracer)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _changeTracker = changeTracker;
+            _tracer = tracer;
         }
 
         public async Task<MerchRequest> CreateAsync(
             MerchRequest itemToCreate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(CreateAsync)).StartActive();
+
             const string sql = @"
                 insert into merch_requests (employee_id, merch_type, status, mode, give_out_date)
                 values  (@EmployeeId, @MerchType, @Status, @Mode, @GiveOutDate) returning id;
@@ -62,6 +68,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
         public async Task<MerchRequest> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(GetByIdAsync)).StartActive();
+
             const string sql = @"
                 select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
@@ -93,6 +101,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchRequest itemToUpdate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(UpdateAsync)).StartActive();
+
             const string sql = @"
                 update merch_requests
                 set
@@ -131,6 +141,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchRequest itemToDelete,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(DeleteAsync)).StartActive();
+
             const string sql = @"
                 delete from merch_requests
                 where id = @Id;
@@ -158,6 +170,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             long employeeId,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(FindByEmployeeIdAsync)).StartActive();
+
             const string sql = @"
                 select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
@@ -192,6 +206,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             long employeeId,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(FindCompletedByEmployeeIdAsync)).StartActive();
+            
             const string sql = @"
                 select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
@@ -229,6 +245,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer.BuildSpan(nameof(FindOutOfStockByRequestMerchTypesAsync)).StartActive();
+            
             const string sql = @"
                 select id, employee_id, merch_type, status, mode, give_out_date
                 from merch_requests
