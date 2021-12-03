@@ -1,30 +1,31 @@
-﻿using System;
+using System;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using CSharpCourse.Core.Lib.Enums;
 using CSharpCourse.Core.Lib.Events;
+using CSharpCourse.Core.Lib.Models;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
+using OzonEdu.MerchandiseService.Infrastructure.Commands.SupplyEvent;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
 {
-    public class EmployeeNotificationEventConsumerBackgroundService : BackgroundService
+    public class StockReplenishedEventConsumerBackgroundService : BackgroundService
     {
         private readonly KafkaConfiguration _kafkaConfiguration;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<EmployeeNotificationEventConsumerBackgroundService> _logger;
+        private readonly ILogger<StockReplenishedEventConsumerBackgroundService> _logger;
 
-        public EmployeeNotificationEventConsumerBackgroundService(
+        public StockReplenishedEventConsumerBackgroundService(
             IOptions<KafkaConfiguration> kafkaConfiguration,
             IServiceScopeFactory scopeFactory,
-            ILogger<EmployeeNotificationEventConsumerBackgroundService> logger
+            ILogger<StockReplenishedEventConsumerBackgroundService> logger
         )
         {
             _kafkaConfiguration = kafkaConfiguration.Value;
@@ -35,21 +36,21 @@ namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation(
-                "EmployeeNotificationEventConsumerBackgroundService: {@KafkaConfiguration}",
+                "StockReplenishedEventConsumerBackgroundService: {@KafkaConfiguration}",
                 _kafkaConfiguration);
 
             await Task.Yield();
 
             var config = new ConsumerConfig
             {
-                GroupId = _kafkaConfiguration.EmployeeNotificationEventGroupId,
+                GroupId = _kafkaConfiguration.StockReplenishedEventGroupId,
                 BootstrapServers = _kafkaConfiguration.BootstrapServers,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false
             };
 
             using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-            consumer.Subscribe(_kafkaConfiguration.EmployeeNotificationEventTopic);
+            consumer.Subscribe(_kafkaConfiguration.StockReplenishedEventTopic);
             try
             {
                 while (!stoppingToken.IsCancellationRequested)
@@ -60,28 +61,20 @@ namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
                         var cr = consumer.Consume(stoppingToken);
                         if (cr != null)
                         {
-                            // Событие о принятии на работу сотрудника и об участии сотрудника в конференции
-                            // слушаем из кафка-топика employee_notification_event. 
+                            // Пополнились остатки
 
-                            var message = JsonSerializer.Deserialize<NotificationEvent>(cr.Message.Value);
+                            var message = JsonSerializer.Deserialize<StockReplenishedEvent>(cr.Message.Value);
                             if (message == null) continue;
 
                             _logger.LogInformation("Event: {@Message}", message);
 
-                            var merchType = message.EventType switch
+                            var command = new ProcessSupplyEventCommand
                             {
-                                EmployeeEventType.Hiring => MerchType.WelcomePack,
-                                EmployeeEventType.ConferenceAttendance => GetMerchTypeByPayload(message.Payload),
-                                _ => (MerchType) 0
-                            };
-
-                            if ((int) merchType == 0) continue;
-
-                            var command = new ProcessMerchRequestCommand
-                            {
-                                EmployeeEmail = message.EmployeeEmail,
-                                MerchType = merchType,
-                                IsSystem = true
+                                Items = message.Type.Select(x => new SupplyShippedItem
+                                {
+                                    SkuId = x.Sku,
+                                    Quantity = 1
+                                }).ToArray()
                             };
 
                             try
@@ -107,34 +100,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
             {
                 consumer.Close();
             }
-        }
-
-        private MerchType GetMerchTypeByPayload(object payload)
-        {
-            if (payload == null)
-            {
-                return 0;
-            }
-
-            try
-            {
-                var jsonElement = (JsonElement) payload;
-                var json = jsonElement.ToString();
-                if (!string.IsNullOrEmpty(json))
-                {
-                    var merchDeliveryEventPayload = JsonSerializer.Deserialize<MerchDeliveryEventPayload>(json);
-                    if (merchDeliveryEventPayload != null)
-                    {
-                        return merchDeliveryEventPayload.MerchType;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Error while deserializing payload");
-            }
-
-            return 0;
         }
     }
 }

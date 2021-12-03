@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using CSharpCourse.Core.Lib.Enums;
 using CSharpCourse.Core.Lib.Events;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.EmployeeAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
@@ -46,6 +47,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
         private readonly EmailOptions _emailOptions;
         private readonly IProducer<string, string> _producer;
         private readonly KafkaConfiguration _kafkaOptions;
+        private readonly ILogger<ApplicationService> _logger;
 
         public ApplicationService(
             IOzonEduEmployeeServiceClient employeeClient,
@@ -163,43 +165,50 @@ namespace OzonEdu.MerchandiseService.Infrastructure.ApplicationServices
 
             if (request.Mode.Equals(CreationMode.System))
             {
-                if (isAllOk)
+                try
                 {
-                    var message = new Message<string, string>
+                    if (isAllOk)
                     {
-                        Key = employee.Id.ToString(),
-                        Value = JsonSerializer.Serialize(new NotificationEvent
+                        var message = new Message<string, string>
                         {
-                            EmployeeName = employee.Name.ToString(),
-                            EmployeeEmail = employee.Email.Value,
-                            EventType = EmployeeEventType.MerchDelivery,
-                            Payload = new MerchDeliveryEventPayload
+                            Key = employee.Id.ToString(),
+                            Value = JsonSerializer.Serialize(new NotificationEvent
                             {
-                                MerchType = request.MerchType.ToMerchType(),
-                                ClothingSize = ClothingSize.L
-                            }
-                        })
-                    };
-                    _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
+                                EmployeeName = employee.Name.ToString(),
+                                EmployeeEmail = employee.Email.Value,
+                                EventType = EmployeeEventType.MerchDelivery,
+                                Payload = new MerchDeliveryEventPayload
+                                {
+                                    MerchType = request.MerchType.ToMerchType(),
+                                    ClothingSize = ClothingSize.L
+                                }
+                            })
+                        };
+                        _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
+                    }
+                    else
+                    {
+                        var message = new Message<string, string>
+                        {
+                            Key = employee.Id.ToString(),
+                            Value = JsonSerializer.Serialize(new NotificationEvent
+                            {
+                                ManagerEmail = _emailOptions.HrToEmail,
+                                EmployeeName = _emailOptions.HrToName,
+                                EventType = EmployeeEventType.MerchDelivery,
+                                Payload = new MerchDeliveryEventPayload
+                                {
+                                    MerchType = request.MerchType.ToMerchType(),
+                                    ClothingSize = ClothingSize.L
+                                }
+                            })
+                        };
+                        _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    var message = new Message<string, string>
-                    {
-                        Key = employee.Id.ToString(),
-                        Value = JsonSerializer.Serialize(new NotificationEvent
-                        {
-                            ManagerEmail = _emailOptions.HrToEmail,
-                            EmployeeName = _emailOptions.HrToName,
-                            EventType = EmployeeEventType.MerchDelivery,
-                            Payload = new MerchDeliveryEventPayload
-                            {
-                                MerchType = request.MerchType.ToMerchType(),
-                                ClothingSize = ClothingSize.L
-                            }
-                        })
-                    };
-                    _producer.Produce(_kafkaOptions.EmployeeNotificationEventTopic, message);
+                    _logger.LogError(e, "Error while sending event {Event}", nameof(NotificationEvent));
                 }
             }
 

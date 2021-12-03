@@ -90,13 +90,16 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Extensions
                 var kafkaConfiguration = iOptions.Value;
                 var producerConfig = new ProducerConfig
                 {
-                    BootstrapServers = kafkaConfiguration.BootstrapServers
+                    BootstrapServers = kafkaConfiguration.BootstrapServers,
+                    Acks = Acks.All,
+                    EnableIdempotence = true
                 };
                 var builder = new ProducerBuilder<string, string>(producerConfig);
                 return builder.Build();
             });
 
             services.AddHostedService<EmployeeNotificationEventConsumerBackgroundService>();
+            services.AddHostedService<StockReplenishedEventConsumerBackgroundService>();
             return services;
         }
     }
