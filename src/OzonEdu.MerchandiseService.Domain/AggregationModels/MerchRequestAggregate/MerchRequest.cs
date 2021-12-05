@@ -19,7 +19,9 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
             RequestMerchType merchType,
             ProcessStatus status,
             CreationMode mode,
-            Date giveOutDate)
+            Date giveOutDate,
+            bool isEmailSended
+            )
         {
             EmployeeId = employeeId;
             MerchType = merchType;
@@ -27,6 +29,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
             Mode = mode;
             GiveOutDate = giveOutDate;
             Id = id;
+            IsEmailSended = isEmailSended;
         }
 
         public EmployeeId EmployeeId { get; }
@@ -34,6 +37,7 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
         public ProcessStatus Status { get; private set; }
         public CreationMode Mode { get; }
         public Date GiveOutDate { get; private set; }
+        public bool IsEmailSended { get; private set; }
 
         public void SetStatus(ProcessStatus status)
         {
@@ -42,6 +46,11 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
             Status = !Status.Equals(ProcessStatus.Complete) && !status.Equals(ProcessStatus.Complete)
                 ? status
                 : throw new CorruptedInvariantException($"Incorrect status: {status}");
+
+            if (Status.Equals(ProcessStatus.OutOfStock))
+            {
+                IsEmailSended = false;
+            }
         }
 
         public void Complete(Date date)
@@ -50,6 +59,11 @@ namespace OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggreg
                 ? ProcessStatus.Complete
                 : throw new CorruptedInvariantException($"Current status is incorrect: {Status}");
             GiveOutDate = date ?? throw new CorruptedInvariantException($"{nameof(date)} is null");
+        }
+
+        public void SendEmail()
+        {
+            IsEmailSended = true;
         }
 
         public override string ToString()

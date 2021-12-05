@@ -28,7 +28,9 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             EmployeeMerchHistoryRequest request,
             ServerCallContext context)
         {
-            using var span = _tracer.BuildSpan(nameof(GetHistoryForEmployee)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchandiseServiceGrpcService)}.{nameof(GetHistoryForEmployee)}")
+                .StartActive();
             span.Span.SetTag("protocol", "gRPC");
             span.Span.SetTag(nameof(request.EmployeeId), request.EmployeeId);
             
@@ -78,7 +80,9 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             EmployeeMerchRequest request,
             ServerCallContext context)
         {
-            using var span = _tracer.BuildSpan(nameof(RequestMerchForEmployee)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchandiseServiceGrpcService)}.{nameof(RequestMerchForEmployee)}")
+                .StartActive();
             span.Span.SetTag("protocol", "gRPC");
             span.Span.SetTag(nameof(request.EmployeeId), request.EmployeeId);
             span.Span.SetTag(nameof(request.MerchType), ((MerchType) request.MerchType).ToString());

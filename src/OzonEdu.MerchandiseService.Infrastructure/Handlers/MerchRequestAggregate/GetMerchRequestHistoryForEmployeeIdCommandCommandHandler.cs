@@ -48,7 +48,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             CancellationToken cancellationToken)
         {
             using var span = _tracer
-                .BuildSpan(nameof(GetMerchRequestHistoryForEmployeeIdCommandCommandHandler))
+                .BuildSpan($"{nameof(GetMerchRequestHistoryForEmployeeIdCommandCommandHandler)}.{nameof(Handle)}")
                 .StartActive();
 
             var key = _cacheKeys.GetMerchRequestHistoryKey(request.EmployeeId);
@@ -94,8 +94,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             long employeeId,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(GetHistoryForEmployee)).StartActive();
-            
+            using var span = _tracer
+                .BuildSpan($"{nameof(GetMerchRequestHistoryForEmployeeIdCommandCommandHandler)}.{nameof(GetHistoryForEmployee)}")
+                .StartActive();
+
             IEnumerable<MerchRequest> history;
 
             try

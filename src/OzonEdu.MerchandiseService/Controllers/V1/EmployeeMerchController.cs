@@ -39,7 +39,9 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             long employeeId,
             CancellationToken token)
         {
-            using var span = _tracer.BuildSpan(nameof(GetHistoryForEmployee)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(EmployeeMerchController)}.{nameof(GetHistoryForEmployee)}")
+                .StartActive();
             span.Span.SetTag("protocol", "http");
             span.Span.SetTag(nameof(employeeId), employeeId);
             
@@ -107,7 +109,9 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             MerchType merchType,
             CancellationToken token)
         {
-            using var span = _tracer.BuildSpan(nameof(RequestMerchForEmployee)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(EmployeeMerchController)}.{nameof(RequestMerchForEmployee)}")
+                .StartActive();
             span.Span.SetTag("protocol", "http");
             span.Span.SetTag(nameof(employeeId), employeeId);
             span.Span.SetTag(nameof(merchType), merchType.ToString());

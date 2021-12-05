@@ -98,7 +98,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
                 merchRequest.MerchType,
                 merchRequest.Status,
                 merchRequest.Mode,
-                merchRequest.GiveOutDate
+                merchRequest.GiveOutDate,
+                merchRequest.IsEmailSended
             );
             var result = Items.TryAdd(id, newMerchRequest)
                 ? newMerchRequest

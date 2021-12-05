@@ -33,7 +33,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchPackItem itemToCreate,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(CreateAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(CreateAsync)}")
+                .StartActive();
             
             const string sql = @"
                 insert into merch_pack_items (name, sku)
@@ -66,7 +68,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
         public async Task<MerchPackItem> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(GetByIdAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(GetByIdAsync)}")
+                .StartActive();
 
             const string sql = @"
                 select id, name, sku 
@@ -100,7 +104,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchPackItem itemToUpdate,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(UpdateAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(UpdateAsync)}")
+                .StartActive();
 
             const string sql = @"
                 update merch_pack_items
@@ -134,7 +140,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchPackItem itemToDelete,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(DeleteAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(DeleteAsync)}")
+                .StartActive();
 
             const string sql = @"
                 delete from merch_pack_items
@@ -163,7 +171,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(FindByMerchTypeAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(FindByMerchTypeAsync)}")
+                .StartActive();
 
             const string sql = @"
                 select
@@ -204,7 +214,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(FindMerchTypesBySkuAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(FindMerchTypesBySkuAsync)}")
+                .StartActive();
 
             const string sql = @"
                 select distinct 
@@ -238,7 +250,9 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default)
         {
-            using var span = _tracer.BuildSpan(nameof(AddToPackAsync)).StartActive();
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(AddToPackAsync)}")
+                .StartActive();
 
             const string sql = @"
                 insert into merch_type_to_items_relations (merch_type, merch_pack_item_id)

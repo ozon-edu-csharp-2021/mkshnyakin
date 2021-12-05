@@ -92,7 +92,7 @@ services:
     ports:
       - "8555:80"
     environment:
-      KafkaTopics__EmployeeNotificationEventTopic: "employee_notification_event"
+      KafkaTopics__EmployeeNotificationEventTopic: "email_notification_event"
       KafkaOptions__Servers: "broker:29092"
       KafkaOptions__ConsumerGroup: "emailing-service-group"
     depends_on:
