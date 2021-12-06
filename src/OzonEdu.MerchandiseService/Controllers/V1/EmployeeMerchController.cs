@@ -1,15 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpCourse.Core.Lib.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OpenTracing;
 using OzonEdu.MerchandiseService.HttpModels;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
-using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.Controllers.V1
 {
@@ -19,10 +18,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
     public class EmployeeMerchController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ITracer _tracer;
 
-        public EmployeeMerchController(IMediator mediator)
+        public EmployeeMerchController(IMediator mediator, ITracer tracer)
         {
             _mediator = mediator;
+            _tracer = tracer;
         }
 
         /// <summary>
@@ -38,6 +39,12 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             long employeeId,
             CancellationToken token)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(EmployeeMerchController)}.{nameof(GetHistoryForEmployee)}")
+                .StartActive();
+            span.Span.SetTag("protocol", "http");
+            span.Span.SetTag(nameof(employeeId), employeeId);
+            
             var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
             {
                 EmployeeId = employeeId
@@ -45,9 +52,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
 
             try
             {
-                var historyItems = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
-            
-                if (!historyItems.Any())
+                var results = await _mediator.Send(getMerchRequestHistoryForEmployeeIdCommand, token);
+
+                var historyItems = results.ToList();
+                if (historyItems.Count == 0)
                 {
                     var notFoundResponse = new RestErrorResponse
                     {
@@ -64,10 +72,10 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                         {
                             Item = new EmployeeMerchItem
                             {
-                                Name = x.Item.ItemName.Value,
-                                SkuId = x.Item.Sku.Id
+                                Name = x.Item.Name,
+                                SkuId = x.Item.Sku
                             },
-                            Date = x.GiveOutDate.Value
+                            Date = x.GiveOutDate
                         })
                 };
 
@@ -101,6 +109,13 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             MerchType merchType,
             CancellationToken token)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(EmployeeMerchController)}.{nameof(RequestMerchForEmployee)}")
+                .StartActive();
+            span.Span.SetTag("protocol", "http");
+            span.Span.SetTag(nameof(employeeId), employeeId);
+            span.Span.SetTag(nameof(merchType), merchType.ToString());
+
             var processUserMerchRequestCommand = new ProcessMerchRequestCommand
             {
                 EmployeeId = employeeId,
@@ -110,6 +125,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
             try
             {
                 var result = await _mediator.Send(processUserMerchRequestCommand, token);
+                span.Span.SetTag(nameof(result.IsSuccess), result.IsSuccess);
                 if (!result.IsSuccess)
                 {
                     var conflictResponse = new RestErrorResponse
@@ -119,7 +135,7 @@ namespace OzonEdu.MerchandiseService.Controllers.V1
                     };
                     return Conflict(conflictResponse);
                 }
-                
+
                 var response = new EmployeeMerchPostResponse
                 {
                     RequestId = result.RequestId,

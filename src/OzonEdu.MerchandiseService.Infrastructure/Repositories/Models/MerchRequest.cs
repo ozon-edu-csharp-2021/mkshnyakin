@@ -10,5 +10,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Models
         public int Status { get; set; }
         public int Mode { get; set; }
         public DateTime? GiveOutDate { get; set; }
+        public bool IsEmailSended { get; set; }
     }
 }

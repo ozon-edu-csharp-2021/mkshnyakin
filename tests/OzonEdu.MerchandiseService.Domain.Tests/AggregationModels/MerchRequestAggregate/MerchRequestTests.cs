@@ -109,5 +109,13 @@ namespace OzonEdu.MerchandiseService.Domain.Tests.AggregationModels.MerchRequest
             merchRequest.Complete(Date.Create("11/23/2021 13:14:00"));
             Assert.Throws<CorruptedInvariantException>(() => merchRequest.Complete(Date.Create("11/23/2021")));
         }
+
+        [Fact]
+        public void MerchRequestSendEmail_SetIsEmailSended_WhenNewMerchRequest()
+        {
+            var merchRequest = CreateValidMerchRequest();
+            merchRequest.SendEmail();
+            Assert.True(merchRequest.IsEmailSended);
+        }
     }
 }

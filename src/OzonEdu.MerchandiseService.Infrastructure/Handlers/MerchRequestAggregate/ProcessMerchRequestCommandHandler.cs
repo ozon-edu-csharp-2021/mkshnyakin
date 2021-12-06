@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using LazyCache;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Contracts;
 using OzonEdu.MerchandiseService.Infrastructure.ApplicationServices;
-using OzonEdu.MerchandiseService.Infrastructure.Cache;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
 using OzonEdu.MerchandiseService.Infrastructure.Extensions;
@@ -17,30 +17,31 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
     public class ProcessMerchRequestCommandHandler
         : IRequestHandler<ProcessMerchRequestCommand, MerchRequestResult>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMerchRequestRepository _merchRequestRepository;
         private readonly IApplicationService _applicationService;
-        private readonly IAppCache _cache;
-        private readonly CacheKeysProvider _cacheKeys;
+        private readonly ITracer _tracer;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ProcessMerchRequestCommandHandler> _logger;
 
         public ProcessMerchRequestCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMerchRequestRepository merchRequestRepository,
             IApplicationService applicationService,
-            IAppCache cache,
-            CacheKeysProvider cacheKeys)
+            ITracer tracer,
+            IUnitOfWork unitOfWork,
+            ILogger<ProcessMerchRequestCommandHandler> logger)
         {
-            _unitOfWork = unitOfWork;
-            _merchRequestRepository = merchRequestRepository;
             _applicationService = applicationService;
-            _cache = cache;
-            _cacheKeys = cacheKeys;
+            _tracer = tracer;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<MerchRequestResult> Handle(
             ProcessMerchRequestCommand command,
             CancellationToken cancellationToken)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(ProcessMerchRequestCommandHandler)}.{nameof(Handle)}")
+                .StartActive();
+
             var requestMerchType = command.MerchType.ToRequestMerchType();
             var creationMode = command.IsSystem ? CreationMode.System : CreationMode.User;
             var employeeEmail = command.EmployeeEmail;
@@ -67,54 +68,38 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Handlers.MerchRequestAggrega
             }
 
 
-            // Проверяется наличие данного мерча на складе через запрос к stock-api
-            // Если все проверки прошли - зарезервировать мерч в stock-api
-            var isComplete = await _applicationService.CheckAndReserve(request, employee, cancellationToken);
-            if (isComplete)
-            {
-                // Отметить у себя в БД, что сотруднику выдан мерч
-                request.Complete(Date.Create(DateTime.Now));
-            }
-            else
-            {
-                //Если мерча нет в наличии - необходимо запомнить, что такой сотрудник запрашивал такой мерч
-                request.SetStatus(ProcessStatus.OutOfStock);
-            }
-
-            var savedRequest = await SaveRequest(request, cancellationToken);
-
-            var response = savedRequest.Status.Equals(ProcessStatus.Complete)
-                ? MerchRequestResult.Success(savedRequest.Status.ToString(), savedRequest.Id)
-                : MerchRequestResult.Fail(savedRequest.Status.ToString(), savedRequest.Id);
-
-            return response;
-        }
-
-        private async Task<MerchRequest> SaveRequest(MerchRequest merchRequest, CancellationToken cancellationToken)
-        {
-            _cache.Remove(_cacheKeys.GetMerchRequestHistoryKey(merchRequest.EmployeeId.Value));
-
             await _unitOfWork.StartTransactionAsync(cancellationToken);
             try
             {
-                if (merchRequest.Id == 0)
+                // Проверяется наличие данного мерча на складе через запрос к stock-api
+                // Если все проверки прошли - зарезервировать мерч в stock-api
+                var isComplete = await _applicationService.CanCheckAndReserve(request, employee, cancellationToken);
+                if (isComplete)
                 {
-                    merchRequest = await _merchRequestRepository.CreateAsync(merchRequest, cancellationToken);
+                    // Отметить у себя в БД, что сотруднику выдан мерч
+                    request.Complete(Date.Create(DateTime.Now));
                 }
                 else
                 {
-                    merchRequest = await _merchRequestRepository.UpdateAsync(merchRequest, cancellationToken);
+                    //Если мерча нет в наличии - необходимо запомнить, что такой сотрудник запрашивал такой мерч
+                    request.SetStatus(ProcessStatus.OutOfStock);
                 }
 
+                var savedRequest = await _applicationService.SaveRequest(request, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                var response = savedRequest.Status.Equals(ProcessStatus.Complete)
+                    ? MerchRequestResult.Success(savedRequest.Status.ToString(), savedRequest.Id)
+                    : MerchRequestResult.Fail(savedRequest.Status.ToString(), savedRequest.Id);
+
+                return response;
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "Error while process transaction. Message: {Message}", e.Message);
                 await _unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
-            
-            return merchRequest;
         }
     }
 }

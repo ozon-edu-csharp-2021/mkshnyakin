@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Models;
 using OzonEdu.MerchandiseService.Infrastructure.Repositories.Infrastructure.Interfaces;
@@ -15,22 +16,29 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
         private const int Timeout = 5;
         private readonly IChangeTracker _changeTracker;
         private readonly IDbConnectionFactory<NpgsqlConnection> _dbConnectionFactory;
+        private readonly ITracer _tracer;
 
         public MerchRequestPostgreSqlRepository(
             IDbConnectionFactory<NpgsqlConnection> dbConnectionFactory,
-            IChangeTracker changeTracker)
+            IChangeTracker changeTracker,
+            ITracer tracer)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _changeTracker = changeTracker;
+            _tracer = tracer;
         }
 
         public async Task<MerchRequest> CreateAsync(
             MerchRequest itemToCreate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(CreateAsync)}")
+                .StartActive();
+
             const string sql = @"
-                insert into merch_requests (employee_id, merch_type, status, mode, give_out_date)
-                values  (@EmployeeId, @MerchType, @Status, @Mode, @GiveOutDate) returning id;
+                insert into merch_requests (employee_id, merch_type, status, mode, give_out_date, is_email_sended)
+                values  (@EmployeeId, @MerchType, @Status, @Mode, @GiveOutDate, @IsEmailSended) returning id;
             ";
 
             var parameters = new
@@ -39,7 +47,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 MerchType = itemToCreate.MerchType.Id,
                 Status = itemToCreate.Status.Id,
                 Mode = itemToCreate.Mode.Id,
-                GiveOutDate = itemToCreate.GiveOutDate?.Value
+                GiveOutDate = itemToCreate.GiveOutDate?.Value,
+                IsEmailSended = itemToCreate.IsEmailSended
             };
 
             var commandDefinition = new CommandDefinition(
@@ -62,8 +71,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
         public async Task<MerchRequest> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(GetByIdAsync)}")
+                .StartActive();
+
             const string sql = @"
-                select id, employee_id, merch_type, status, mode, give_out_date
+                select id, employee_id, merch_type, status, mode, give_out_date, is_email_sended
                 from merch_requests
                 where id = @Id;
             ";
@@ -93,6 +106,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchRequest itemToUpdate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(UpdateAsync)}")
+                .StartActive();
+
             const string sql = @"
                 update merch_requests
                 set
@@ -100,7 +117,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                     merch_type = @MerchType,
                     status = @Status,
                     mode = @Mode,
-                    give_out_date = @GiveOutDate
+                    give_out_date = @GiveOutDate,
+                    is_email_sended = @IsEmailSended
                 where id = @Id;
             ";
 
@@ -111,7 +129,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 MerchType = itemToUpdate.MerchType.Id,
                 Status = itemToUpdate.Status.Id,
                 Mode = itemToUpdate.Mode.Id,
-                GiveOutDate = itemToUpdate.GiveOutDate?.Value
+                GiveOutDate = itemToUpdate.GiveOutDate?.Value,
+                IsEmailSended = itemToUpdate.IsEmailSended
             };
 
             var commandDefinition = new CommandDefinition(
@@ -131,6 +150,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchRequest itemToDelete,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(DeleteAsync)}")
+                .StartActive();
+
             const string sql = @"
                 delete from merch_requests
                 where id = @Id;
@@ -158,8 +181,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             long employeeId,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(FindByEmployeeIdAsync)}")
+                .StartActive();
+
             const string sql = @"
-                select id, employee_id, merch_type, status, mode, give_out_date
+                select id, employee_id, merch_type, status, mode, give_out_date, is_email_sended
                 from merch_requests
                 where employee_id = @EmployeeId;
             ";
@@ -192,8 +219,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             long employeeId,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(FindCompletedByEmployeeIdAsync)}")
+                .StartActive();
+
             const string sql = @"
-                select id, employee_id, merch_type, status, mode, give_out_date
+                select id, employee_id, merch_type, status, mode, give_out_date, is_email_sended
                 from merch_requests
                 where 
                     employee_id = @EmployeeId
@@ -229,8 +260,12 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<RequestMerchType> requestMerchTypes,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchRequestPostgreSqlRepository)}.{nameof(FindOutOfStockByRequestMerchTypesAsync)}")
+                .StartActive();
+
             const string sql = @"
-                select id, employee_id, merch_type, status, mode, give_out_date
+                select id, employee_id, merch_type, status, mode, give_out_date, is_email_sended
                 from merch_requests
                 where 
                     status = @Status
@@ -252,7 +287,7 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             var connection = await _dbConnectionFactory.CreateConnection(cancellationToken);
 
             var queryResult = await QueryMerchRequestsAsync(connection, commandDefinition);
-            
+
             var merchRequestItems = queryResult.ToArray();
             foreach (var merchRequest in merchRequestItems)
             {
@@ -279,7 +314,8 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
                 Enumeration.GetById<RequestMerchType>(merchRequestModel.MerchType),
                 Enumeration.GetById<ProcessStatus>(merchRequestModel.Status),
                 Enumeration.GetById<CreationMode>(merchRequestModel.Mode),
-                merchRequestModel.GiveOutDate.HasValue ? Date.Create(merchRequestModel.GiveOutDate.Value) : null
+                merchRequestModel.GiveOutDate.HasValue ? Date.Create(merchRequestModel.GiveOutDate.Value) : null,
+                merchRequestModel.IsEmailSended
             );
             return merchRequest;
         }

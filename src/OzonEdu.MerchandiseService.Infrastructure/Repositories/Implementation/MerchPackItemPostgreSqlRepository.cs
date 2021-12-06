@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
 using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Domain.Models;
@@ -16,19 +17,26 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
         private const int Timeout = 5;
         private readonly IChangeTracker _changeTracker;
         private readonly IDbConnectionFactory<NpgsqlConnection> _dbConnectionFactory;
+        private readonly ITracer _tracer;
 
         public MerchPackItemPostgreSqlRepository(
             IDbConnectionFactory<NpgsqlConnection> dbConnectionFactory,
-            IChangeTracker changeTracker)
+            IChangeTracker changeTracker,
+            ITracer tracer)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _changeTracker = changeTracker;
+            _tracer = tracer;
         }
 
         public async Task<MerchPackItem> CreateAsync(
             MerchPackItem itemToCreate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(CreateAsync)}")
+                .StartActive();
+            
             const string sql = @"
                 insert into merch_pack_items (name, sku)
                 values  (@Name, @Sku) returning id;
@@ -60,6 +68,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
 
         public async Task<MerchPackItem> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(GetByIdAsync)}")
+                .StartActive();
+
             const string sql = @"
                 select id, name, sku 
                 from merch_pack_items
@@ -92,6 +104,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchPackItem itemToUpdate,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(UpdateAsync)}")
+                .StartActive();
+
             const string sql = @"
                 update merch_pack_items
                 set
@@ -124,6 +140,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             MerchPackItem itemToDelete,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(DeleteAsync)}")
+                .StartActive();
+
             const string sql = @"
                 delete from merch_pack_items
                 where id = @Id;
@@ -151,6 +171,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             RequestMerchType requestMerchType,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(FindByMerchTypeAsync)}")
+                .StartActive();
+
             const string sql = @"
                 select
                     i.id,
@@ -190,6 +214,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<long> skuIds,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(FindMerchTypesBySkuAsync)}")
+                .StartActive();
+
             const string sql = @"
                 select distinct 
                     r.merch_type
@@ -222,6 +250,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Repositories.Implementation
             IEnumerable<MerchPackItem> merchPackItems,
             CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchPackItemPostgreSqlRepository)}.{nameof(AddToPackAsync)}")
+                .StartActive();
+
             const string sql = @"
                 insert into merch_type_to_items_relations (merch_type, merch_pack_item_id)
                 values (@MerchType, @MerchPackItemId)

@@ -10,6 +10,7 @@ ProjectSection(SolutionItems) = preProject
 	bounded-context-canvas.drawio = bounded-context-canvas.drawio
 	entrypoint.sh = entrypoint.sh
 	wait-for-it.sh = wait-for-it.sh
+	create-kafka-topics.sh = create-kafka-topics.sh
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34C94014-E3FD-40EC-B6C0-8CCC003109FA}"
@@ -43,6 +44,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.MerchandiseService.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzonEdu.StockApi.GrpcClient", "src\OzonEdu.StockApi.GrpcClient\OzonEdu.StockApi.GrpcClient.csproj", "{BC11A2A0-5BBF-4A5F-93B4-2853D47966FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Confluent.Kafka.AdminClient", "src\Confluent.Kafka.AdminClient\Confluent.Kafka.AdminClient.csproj", "{0A258F5E-A10F-4B2A-892B-1687F7D3D801}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpCourse.EmployeesService.PresentationModels", "src\CSharpCourse.EmployeesService.PresentationModels\CSharpCourse.EmployeesService.PresentationModels.csproj", "{84F4B9C4-6F76-4C79-BE82-A24EF97E3159}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +64,8 @@ Global
 		{E66A903B-3149-4E92-839F-E59E9564EEF7} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 		{25184094-181B-41DA-855C-B57043576137} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 		{BC11A2A0-5BBF-4A5F-93B4-2853D47966FB} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
+		{0A258F5E-A10F-4B2A-892B-1687F7D3D801} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
+		{84F4B9C4-6F76-4C79-BE82-A24EF97E3159} = {34C94014-E3FD-40EC-B6C0-8CCC003109FA}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EAB68E78-CBBB-4736-A400-1A10954C370A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -101,5 +108,13 @@ Global
 		{BC11A2A0-5BBF-4A5F-93B4-2853D47966FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC11A2A0-5BBF-4A5F-93B4-2853D47966FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC11A2A0-5BBF-4A5F-93B4-2853D47966FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A258F5E-A10F-4B2A-892B-1687F7D3D801}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A258F5E-A10F-4B2A-892B-1687F7D3D801}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A258F5E-A10F-4B2A-892B-1687F7D3D801}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A258F5E-A10F-4B2A-892B-1687F7D3D801}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84F4B9C4-6F76-4C79-BE82-A24EF97E3159}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84F4B9C4-6F76-4C79-BE82-A24EF97E3159}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84F4B9C4-6F76-4C79-BE82-A24EF97E3159}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84F4B9C4-6F76-4C79-BE82-A24EF97E3159}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

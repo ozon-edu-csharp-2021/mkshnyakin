@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Infrastructure.Configuration;
 using OzonEdu.MerchandiseService.Infrastructure.Contracts;
 using OzonEdu.StockApi.Grpc;
@@ -16,9 +17,11 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation
         private readonly GrpcChannel _channel;
         private readonly StockApiGrpc.StockApiGrpcClient _client;
         private readonly OzonEduStockApiGrpcOptions _options;
+        private readonly ITracer _tracer;
 
-        public OzonEduStockApiGrpcClient(IOptions<OzonEduStockApiGrpcOptions> options)
+        public OzonEduStockApiGrpcClient(IOptions<OzonEduStockApiGrpcOptions> options, ITracer tracer)
         {
+            _tracer = tracer;
             _options = options.Value;
             _channel = GrpcChannel.ForAddress(_options.Address);
             _client = new StockApiGrpc.StockApiGrpcClient(_channel);
@@ -31,6 +34,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation
 
         public async Task<bool> IsAvailable(IEnumerable<long> skus, CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(OzonEduStockApiGrpcClient)}.{nameof(IsAvailable)}")
+                .StartActive();
+
             if (skus is null)
             {
                 return false;
@@ -55,6 +62,10 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Clients.Implementation
 
         public async Task<bool> Reserve(IEnumerable<long> skus, CancellationToken cancellationToken = default)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(OzonEduStockApiGrpcClient)}.{nameof(Reserve)}")
+                .StartActive();
+
             if (skus is null)
             {
                 return false;

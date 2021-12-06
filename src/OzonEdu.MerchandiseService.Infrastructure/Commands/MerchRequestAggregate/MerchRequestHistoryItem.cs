@@ -1,11 +1,10 @@
-﻿using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchPackItemAggregate;
-using OzonEdu.MerchandiseService.Domain.AggregationModels.MerchRequestAggregate;
+﻿using System;
 
 namespace OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate
 {
     public class MerchRequestHistoryItem
     {
-        public MerchPackItem Item { get; init; }
-        public Date GiveOutDate { get; init; }
+        public MerchPackHistoryItem Item { get; init; }
+        public DateTime GiveOutDate { get; init; }
     }
 }

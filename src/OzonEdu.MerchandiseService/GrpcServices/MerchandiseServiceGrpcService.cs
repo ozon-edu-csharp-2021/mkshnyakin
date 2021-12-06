@@ -6,26 +6,34 @@ using CSharpCourse.Core.Lib.Enums;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
+using OpenTracing;
 using OzonEdu.MerchandiseService.Grpc;
 using OzonEdu.MerchandiseService.Infrastructure.Commands.MerchRequestAggregate;
 using OzonEdu.MerchandiseService.Infrastructure.Exceptions;
-using OzonEdu.MerchandiseService.Services;
 
 namespace OzonEdu.MerchandiseService.GrpcServices
 {
     public class MerchandiseServiceGrpcService : MerchandiseServiceGrpc.MerchandiseServiceGrpcBase
     {
         private readonly IMediator _mediator;
+        private readonly ITracer _tracer;
 
-        public MerchandiseServiceGrpcService(IMediator mediator)
+        public MerchandiseServiceGrpcService(IMediator mediator, ITracer tracer)
         {
             _mediator = mediator;
+            _tracer = tracer;
         }
 
         public override async Task<GetHistoryForEmployeeResponse> GetHistoryForEmployee(
             EmployeeMerchHistoryRequest request,
             ServerCallContext context)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchandiseServiceGrpcService)}.{nameof(GetHistoryForEmployee)}")
+                .StartActive();
+            span.Span.SetTag("protocol", "gRPC");
+            span.Span.SetTag(nameof(request.EmployeeId), request.EmployeeId);
+            
             IEnumerable<MerchRequestHistoryItem> history = null;
             var getMerchRequestHistoryForEmployeeIdCommand = new GetMerchRequestHistoryForEmployeeIdCommand
             {
@@ -54,10 +62,10 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             {
                 Item = new EmployeeMerchItem
                 {
-                    Name = x.Item.ItemName.Value,
-                    SkuId = x.Item.Sku.Id
+                    Name = x.Item.Name,
+                    SkuId = x.Item.Sku
                 },
-                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.GiveOutDate.Value, DateTimeKind.Utc))
+                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.GiveOutDate, DateTimeKind.Utc))
             });
 
             var result = new GetHistoryForEmployeeResponse
@@ -72,6 +80,13 @@ namespace OzonEdu.MerchandiseService.GrpcServices
             EmployeeMerchRequest request,
             ServerCallContext context)
         {
+            using var span = _tracer
+                .BuildSpan($"{nameof(MerchandiseServiceGrpcService)}.{nameof(RequestMerchForEmployee)}")
+                .StartActive();
+            span.Span.SetTag("protocol", "gRPC");
+            span.Span.SetTag(nameof(request.EmployeeId), request.EmployeeId);
+            span.Span.SetTag(nameof(request.MerchType), ((MerchType) request.MerchType).ToString());
+            
             var processUserMerchRequestCommand = new ProcessMerchRequestCommand
             {
                 EmployeeId = request.EmployeeId,
@@ -88,6 +103,7 @@ namespace OzonEdu.MerchandiseService.GrpcServices
                     RequestId = result.RequestId,
                     Message = result.Message
                 };
+                span.Span.SetTag(nameof(result.IsSuccess), result.IsSuccess);
                 return response;
             }
             catch (ItemNotFoundException e)

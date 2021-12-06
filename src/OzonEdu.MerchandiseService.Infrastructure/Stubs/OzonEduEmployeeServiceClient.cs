@@ -130,14 +130,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.Stubs
             return Task.FromResult(result);
         }
 
-        public Task<EmployeeViewModel> FindByEmailAsync(
-            string employeeEmail,
-            CancellationToken cancellationToken = default)
-        {
-            var result = Items.FirstOrDefault(x => x.Email == employeeEmail);
-            return Task.FromResult(result);
-        }
-
         public class EmployeeViewModel
         {
             public long Id { get; init; }
