@@ -54,7 +54,6 @@ namespace OzonEdu.MerchandiseService.Infrastructure.HostedServices
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    await Task.Yield();
                     try
                     {
                         var cr = consumer.Consume(stoppingToken);
